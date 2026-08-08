@@ -1,4 +1,4 @@
-const CACHE='pad-pantry-v1.3';
+const CACHE='pad-pantry-v1.4';
 
 const ASSETS=[
   './',
