@@ -133,6 +133,19 @@ button:active{transform:scale(.98)}
   color:var(--ink)
 }
 .actions .primary{background:#fff0f5;border-color:#f3c4d1;color:#98425f}
+.actions .edit{
+  background:linear-gradient(135deg,#e6f8f7,#ece8ff);
+  border-color:#abd9d8;
+  color:#47737a;
+  font-weight:800;
+  box-shadow:0 4px 12px rgba(112,171,177,.14);
+}
+.actions .edit:hover{
+  background:linear-gradient(135deg,#d8f3f1,#e2dcfb);
+  border-color:#93ccca;
+  box-shadow:0 5px 14px rgba(112,171,177,.18);
+  transform:translateY(-1px);
+}
 .empty{
   padding:30px 20px;text-align:center;color:var(--muted);
   border:1.5px dashed #efcfd9;border-radius:19px;background:#fffafd
@@ -325,6 +338,12 @@ button:active{transform:scale(.98)}
   -webkit-text-fill-color:#8d7b82;
 }
 
+.type-select.type-liner{background:#f1fbf7!important;border-color:#cfe9df!important;color:#4c7968!important}
+.type-select.type-day{background:#fff2f6!important;border-color:#f0d3dc!important;color:#96586b!important}
+.type-select.type-night{background:#f5f1ff!important;border-color:#ddd3f3!important;color:#715f96!important}
+.type-select.type-pants{background:#fff8eb!important;border-color:#eeddbd!important;color:#8b6c3e!important}
+
+
 
 .quick-primary{grid-template-columns:repeat(2,1fr)}
 .quick-secondary{grid-template-columns:repeat(3,1fr)}
@@ -492,6 +511,81 @@ button:active{transform:scale(.98)}
 
 
 .history-cat.purchase{background:#fff0d6;color:#8a672d}
+.history-cat.modify{background:#eaf2ff;color:#496b9d}
+
+.history-filter-chips .chip.filter-modify{background:#eef4ff;border-color:#cddcf2;color:#506f9d}
+.history-filter-chips .chip.filter-modify.active{background:#dce9ff;border-color:#abc4e7;color:#385d91}
+
+.location-choice{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:6px 0 8px;
+}
+.location-choice label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:0;
+  padding:9px 13px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  color:var(--ink);
+  cursor:pointer;
+  font-weight:600;
+}
+.location-choice input[type="radio"]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:16px;
+  height:16px;
+  margin:0;
+  border:1.5px solid #d8b9c4;
+  border-radius:50%;
+  background:#fff;
+  display:inline-grid;
+  place-content:center;
+  flex:0 0 16px;
+}
+.location-choice input[type="radio"]::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  transform:scale(0);
+  transition:transform .12s ease;
+  background:var(--accent-deep);
+}
+.location-choice input[type="radio"]:checked{
+  border-color:#d792aa;
+  background:#fff;
+}
+.location-choice input[type="radio"]:checked::before{
+  transform:scale(1);
+}
+.location-choice label:has(input[type="radio"]:checked){
+  background:#fff8fb;
+  border-color:#efccd7;
+  box-shadow:0 2px 7px rgba(151,88,111,.05);
+}
+.location-other-input{margin-top:8px}
+
+#duplicateModal{
+  align-items:center;
+  padding:16px;
+}
+#duplicateModal .modal{
+  width:min(520px,100%);
+  border-radius:24px;
+}
+
+.inventory-lock-note{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+  margin-top:6px;
+}
 
 
 /* 設定頁：先建立雲端同步區塊，之後接 Supabase 時直接沿用 */
@@ -637,6 +731,7 @@ button:active{transform:scale(.98)}
   <main id="history" class="view">
     <div class="section">
       <div class="section-head"><div><h3>📖 小棉倉日記</h3><div class="sub">採購和每次盤點的變化都幫妳留著</div></div><button class="btn" onclick="exportCSV()">匯出 CSV</button></div>
+      <input id="historySearchBox" class="search" placeholder="搜尋日期、品項、類型、通路、修改內容…" oninput="historyPage=1;renderHistory()" />
       <div class="history-filter-wrap">
         <div class="chips history-filter-chips" id="historyFilterChips"></div>
       </div>
@@ -676,20 +771,62 @@ button:active{transform:scale(.98)}
 
 
 
-<!-- New stock key check -->
+<!-- New stock -->
 <div class="modalback" id="newStockKeyModal"><div class="modal">
-  <h3>🌸 新增品項</h3><p>先填品項的辨識資料，小棉倉會先確認是否已經存在相同品項。</p>
-  <div class="grid2"><div class="field"><label>品牌 *</label><input id="newKeyBrand" placeholder="例如 蘇菲"></div><div class="field"><label>系列 / 款式 *</label><input id="newKeySeries" placeholder="例如 超熟睡"></div></div>
-  <div class="field"><label>類型 *</label><select id="newKeyType" onchange="syncNewKeyFields()"><option>護墊</option><option selected>日用</option><option>夜用</option><option>褲型</option></select></div>
-  <div class="field" id="newKeyLengthField"><label>長度（cm） *</label><input id="newKeyLength" type="text" inputmode="decimal" placeholder="例如 23、24.5" oninput="cleanLengthInput(this)"></div>
-  <div class="field" id="newKeyPantsField" style="display:none"><label>褲型款式 *</label><select id="newKeyPantsType"><option>日用褲</option><option>夜用褲</option></select></div>
-  <div class="modal-actions"><button class="btn grow" onclick="cancelNewStockKey()">取消</button><button class="btn primary grow" onclick="checkNewStockDuplicate()">下一步</button></div>
+  <h3>🌸 新增品項</h3>
+  <p>請建立品項的基本資料；實際庫存請統一到「盤點」功能維護。</p>
+
+  <div class="grid2">
+    <div class="field"><label>品牌 *</label><input id="newKeyBrand" placeholder="例如 蘇菲"></div>
+    <div class="field"><label>系列 / 款式 *</label><input id="newKeySeries" placeholder="例如 超熟睡"></div>
+  </div>
+
+  <div class="field">
+    <label>類型 *</label>
+    <select id="newKeyType" class="type-select" onchange="syncNewKeyFields()">
+      <option>護墊</option><option selected>日用</option><option>夜用</option><option>褲型</option>
+    </select>
+  </div>
+
+  <div class="field" id="newKeyLengthField">
+    <label>長度（cm） *</label>
+    <input id="newKeyLength" type="text" inputmode="decimal" placeholder="例如 23、24.5" oninput="cleanLengthInput(this)">
+  </div>
+
+  <div class="field" id="newKeyPantsField" style="display:none">
+    <label>褲型款式 *</label>
+    <select id="newKeyPantsType"><option>日用褲</option><option>夜用褲</option></select>
+  </div>
+
+  <div class="field">
+    <label>每包片數 *</label>
+    <input id="newKeyPackSize" type="text" inputmode="numeric" value="0" placeholder="例如 14" oninput="cleanIntegerInput(this)">
+  </div>
+
+  <div class="field">
+    <label>放置位置 *</label>
+    <div class="location-choice">
+      <label><input type="radio" name="newKeyLocationMode" value="預設" checked onchange="syncNewKeyLocation()">預設</label>
+      <label><input type="radio" name="newKeyLocationMode" value="其他" onchange="syncNewKeyLocation()">其他</label>
+    </div>
+    <input id="newKeyLocationOther" class="location-other-input" placeholder="請輸入放置位置" style="display:none">
+  </div>
+
+  <div class="field">
+    <label>備註</label>
+    <textarea id="newKeyNote" placeholder="（有需要再填就好～）"></textarea>
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn grow" onclick="cancelNewStockKey()">取消</button>
+    <button class="btn primary grow" onclick="saveNewStockKey()">新增</button>
+  </div>
 </div></div>
 
 <!-- Duplicate found -->
 <div class="modalback" id="duplicateModal"><div class="modal">
   <h3>🌼 已有相同品項</h3><p id="duplicateText"></p>
-  <div class="modal-actions"><button class="btn primary grow" onclick="goManageDuplicate()">前往管理庫存</button></div>
+  <div class="modal-actions"><button class="btn primary grow" onclick="returnFromDuplicate()">確定</button></div>
 </div></div>
 
 <!-- Manage stock -->
@@ -697,13 +834,14 @@ button:active{transform:scale(.98)}
   <h3>📦 盤點：單一品項</h3><p>選擇一個現有品項，填實際未拆封包數與已拆封剩餘片數。</p>
   <div class="field"><label>品項 *</label><select id="manageItem" onchange="syncManageStock()"></select></div>
   <div class="grid2"><div class="field"><label>未拆封包數 *</label><input id="manageUnopenedPacks" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateManagePreview()"></div><div class="field"><label>已拆封剩餘片數 *</label><input id="manageOpenedQty" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateManagePreview()"></div></div>
+  <div class="field"><label>盤點日期 *</label><input id="manageDate" type="date"></div>
   <div class="total-preview manage-preview" id="managePreview"></div>
   <div class="modal-actions"><button class="btn grow" onclick="closeModal('manageStockModal')">取消</button><button class="btn primary grow" onclick="saveManageStock()">完成</button></div>
 </div></div>
 
 <!-- Purchase -->
 <div class="modalback" id="purchaseModal"><div class="modal">
-  <h3>🛍️ 新增採購</h3><p>每包片數以品項設定為準；這裡只登記本次新增幾包與採購資訊。</p>
+  <h3>🛍️ 新增採購</h3><p>若尚未建立目標品項，請先新增品項；這裡只登記本次採購資訊。</p>
   <div class="field"><label>品項 *</label><select id="purchaseItem" onchange="syncPurchaseItem()"></select></div>
   <div class="grid2">
     <div class="field"><label>買了幾包 *</label><input id="purchasePacks" type="text" inputmode="numeric" value="1" oninput="cleanIntegerInput(this);updatePurchaseHint()"></div>
@@ -737,16 +875,52 @@ button:active{transform:scale(.98)}
 
 <!-- Item editor -->
 <div class="modalback" id="itemModal"><div class="modal">
-  <h3 id="itemModalTitle">新增品項</h3><p id="itemModalDesc">確認品項資料與庫存。</p>
+  <h3>✏️ 編輯品項</h3>
+  <p>可以在這裡調整品項的基本資料；如果要修改實際庫存，請使用「盤點」功能喔～</p>
   <input type="hidden" id="editItemId">
-  <div class="grid2"><div class="field"><label>品牌 *</label><input id="itemBrand" placeholder="例如 蘇菲"></div><div class="field"><label>系列 / 款式 *</label><input id="itemSeries" placeholder="例如 超熟睡"></div></div>
-  <div class="grid2"><div class="field"><label>類型 *</label><select id="itemType" onchange="syncItemFields()"><option>護墊</option><option selected>日用</option><option>夜用</option><option>褲型</option></select></div><div class="field" id="lengthField"><label>長度（cm） *</label><input id="itemLength" type="text" inputmode="decimal" placeholder="例如 23、24.5" oninput="cleanLengthInput(this)"></div><div class="field" id="pantsField" style="display:none"><label>褲型款式 *</label><select id="itemPantsType"><option>日用褲</option><option>夜用褲</option></select></div></div>
-  <div class="field"><label>放置位置</label><input id="itemLocation"></div>
-  <div class="grid2"><div class="field"><label>每包片數 *</label><input id="itemPackSize" type="text" inputmode="numeric" placeholder="例如 14" oninput="cleanIntegerInput(this);updateItemTotalPreview()"></div><div class="field"><label>未拆封包數 *</label><input id="itemUnopenedPacks" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateItemTotalPreview()"></div></div>
-  <div class="field"><label>已拆封剩餘片數 *</label><input id="itemOpenedQty" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateItemTotalPreview()"></div>
-  <div class="total-preview" id="itemTotalPreview">目前總庫存會自動顯示在這裡 ✨</div>
-  <div class="field"><label>備註</label><textarea id="itemNote"></textarea></div>
-  <div class="modal-actions"><button class="btn grow" id="itemBackBtn" style="display:none" onclick="backToNewStockKey()">上一步</button><button class="btn grow" onclick="cancelItemEditor()">取消</button><button class="btn primary grow" onclick="saveItem()">儲存</button></div>
+
+  <div class="grid2">
+    <div class="field"><label>品牌 *</label><input id="itemBrand" placeholder="例如 蘇菲"></div>
+    <div class="field"><label>系列 / 款式 *</label><input id="itemSeries" placeholder="例如 超熟睡"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="field">
+      <label>類型 *</label>
+      <select id="itemType" class="type-select" onchange="syncItemFields()">
+        <option>護墊</option><option>日用</option><option>夜用</option><option>褲型</option>
+      </select>
+    </div>
+    <div class="field" id="lengthField">
+      <label>長度（cm） *</label>
+      <input id="itemLength" type="text" inputmode="decimal" placeholder="例如 23、24.5" oninput="cleanLengthInput(this)">
+    </div>
+    <div class="field" id="pantsField" style="display:none">
+      <label>褲型款式 *</label>
+      <select id="itemPantsType"><option>日用褲</option><option>夜用褲</option></select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>每包片數 *</label>
+    <input id="itemPackSize" class="locked-input" type="text" readonly>
+  </div>
+
+  <div class="field">
+    <label>放置位置 *</label>
+    <div class="location-choice">
+      <label><input id="itemLocationDefault" type="radio" name="itemLocationMode" value="預設" onchange="syncItemLocation()">預設</label>
+      <label><input id="itemLocationOtherRadio" type="radio" name="itemLocationMode" value="其他" onchange="syncItemLocation()">其他</label>
+    </div>
+    <input id="itemLocationOther" class="location-other-input" placeholder="請輸入放置位置" style="display:none">
+  </div>
+
+  <div class="field"><label>備註</label><textarea id="itemNote" placeholder="（有需要再填就好～）"></textarea></div>
+
+  <div class="modal-actions">
+    <button class="btn grow" onclick="cancelItemEditor()">取消</button>
+    <button class="btn primary grow" onclick="saveItem()">儲存</button>
+  </div>
 </div></div>
 
 <!-- Cloud login -->
@@ -806,19 +980,13 @@ button:active{transform:scale(.98)}
     </div>
   </div>
 
-  <div class="settings-group">
-    <h4>🧪 測試工具</h4>
-    <div class="group-desc">需要測試畫面或流程時，可以快速加入示範資料；加入後也會同步到雲端。</div>
-    <button class="btn" onclick="loadDemoData()">載入示範資料</button>
-  </div>
-
-  <div class="settings-version">小棉倉 v1.4</div>
+  <div class="settings-version">小棉倉 v1.5</div>
   <div class="modal-actions"><button class="btn primary grow" onclick="closeModal('settingsModal')">關閉</button></div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const APP_VERSION='1.4';
+const APP_VERSION='1.5';
 const KEY='pad_inventory_cloud_v1';
 const CLOUD_META_KEY='pad_inventory_cloud_meta_v1';
 const LAST_LOGIN_EMAIL_KEY='pad_inventory_last_login_email';
@@ -831,9 +999,7 @@ const supabaseClient=window.supabase
 
 const TYPES=['全部','護墊','日用','夜用','褲型'];
 let filterType='全部';
-let pendingNewKey=null;
-let pendingItemDraft=null;
-let duplicateItemId='';
+let duplicateReturnModal='';
 let newKeyTypeLocked=false;
 let historyPage=1;
 let historyFilter='全部';
@@ -902,6 +1068,7 @@ function normalizeDB(v){
   v.events=Array.isArray(v.events)?v.events:[];
   v.items.forEach(i=>{
     if(i.type==='量多日用')i.type='日用';
+    if(!String(i.location||'').trim())i.location='預設';
     const ps=Math.max(0,Number(i.packSize||0));
     if(i.unopenedPacks===undefined||i.openedQty===undefined){
       const oldQty=Math.max(0,Number(i.qty||0));
@@ -1265,7 +1432,13 @@ function manageOptionText(i){
 }
 function itemKeyFromData(x){
   const type=x.type;
-  return [normText(x.brand),normText(x.series),type,type==='褲型'?normText(x.pantsType):String(Number(x.length||0))].join('§');
+  return [
+    normText(x.brand),
+    normText(x.series),
+    type,
+    type==='褲型'?normText(x.pantsType):String(Number(x.length||0)),
+    normText(x.location||'預設')
+  ].join('§');
 }
 function findDuplicate(data,excludeId=''){
   const key=itemKeyFromData(data);
@@ -1273,6 +1446,11 @@ function findDuplicate(data,excludeId=''){
 }
 function typeClass(type){
   return type==='護墊'?'type-liner':type==='日用'?'type-day':type==='夜用'?'type-night':type==='褲型'?'type-pants':'type-all';
+}
+function applyTypeSelectColor(el){
+  if(!el)return;
+  el.classList.remove('type-liner','type-day','type-night','type-pants','type-all');
+  el.classList.add(typeClass(el.value));
 }
 function typeSortOrder(type){
   return type==='護墊'?1:type==='日用'?2:type==='夜用'?3:type==='褲型'?4:99;
@@ -1312,11 +1490,11 @@ function card(i){
     <div class="item-top">
       <div>
         <h4>${esc(itemDisplayName(i))}</h4>
-        <div class="meta">${esc(i.type)}${i.location?`・${esc(i.location)}`:''}<br>每包 ${fmt(i.packSize)} 片・${itemStockText(i)}</div>
+        <div class="meta">放置位置：${esc(i.location||'預設')}<br>每包 ${fmt(i.packSize)} 片・${itemStockText(i)}</div>
       </div>
-      <div class="qty">${fmt(calcQty(i))}<small style="font-size:12px;color:var(--muted);font-weight:500"> 片</small></div>
+      <div class="qty">${fmt(i.unopenedPacks)}<small style="font-size:12px;color:var(--muted);font-weight:500"> 包</small><span style="font-size:16px;font-weight:650;color:var(--muted)"> + </span>${fmt(i.openedQty)}<small style="font-size:12px;color:var(--muted);font-weight:500"> 片</small><span style="font-size:15px;font-weight:650;color:var(--muted)"> = </span>${fmt(calcQty(i))}<small style="font-size:12px;color:var(--muted);font-weight:500"> 片</small></div>
     </div>
-    <div class="actions"><button onclick="openItemEditor('${i.id}')">編輯</button><button class="danger" onclick="deleteItemById('${i.id}')">刪除</button></div>
+    <div class="actions"><button class="edit" onclick="openItemEditor('${i.id}')">編輯</button><button class="danger" onclick="deleteItemById('${i.id}')">刪除</button></div>
   </div>`;
 }
 function renderTypeChips(){
@@ -1336,6 +1514,7 @@ function renderInventory(){
 
 function categoryForEvent(e){
   if(e.kind==='purchase')return {text:'採購',cls:'purchase'};
+  if(e.kind==='modify')return {text:'修改',cls:'modify'};
   if(e.kind==='delete')return {text:'刪除',cls:'delete'};
   if(['usage','adjustment','manage','countSummary'].includes(e.kind))return {text:'盤點',cls:'count'};
   return {text:'新增',cls:'add'};
@@ -1346,11 +1525,12 @@ function historyCategory(e){
 function historyFilterClass(label){
   return label==='新增'?'filter-add':
          label==='採購'?'filter-purchase':
+         label==='修改'?'filter-modify':
          label==='刪除'?'filter-delete':
          label==='盤點'?'filter-count':'filter-all';
 }
 function renderHistoryFilterChips(){
-  const labels=['全部','新增','採購','刪除','盤點'];
+  const labels=['全部','新增','採購','修改','刪除','盤點'];
   const host=document.getElementById('historyFilterChips');
   if(!host)return;
   host.innerHTML=labels.map(label=>
@@ -1379,6 +1559,14 @@ function historyCountLabel(e){
   if(e.kind==='manage')return '單一品項盤點';
   return '盤點';
 }
+function historyDisplayName(e,i){
+  const base=i
+    ?itemDisplayName(i)
+    :(e.itemType?`${e.itemType}｜${e.itemName||'已刪除品項'}`:(e.itemName||'已刪除品項'));
+
+  const location=String(i?.location??e.itemLocation??'預設').trim()||'預設';
+  return location==='預設'?base:`${base}｜${location}`;
+}
 function applyHistoryPageSize(){
   const raw=Number(document.getElementById('historyPageSize').value||0);
   historyPageSize=Math.max(1,raw);
@@ -1391,10 +1579,33 @@ function changeHistoryPage(delta){
   historyPage=Math.max(1,historyPage+delta);
   renderHistory();
 }
+function historySearchText(e){
+  const i=db.items.find(x=>x.id===e.itemId);
+  const cat=categoryForEvent(e).text;
+  const name=historyDisplayName(e,i);
+  return [
+    e.date||'',
+    cat,
+    name,
+    e.itemType||'',
+    e.itemName||'',
+    e.itemLocation||'',
+    e.detail||'',
+    e.context||'',
+    e.store||'',
+    e.promo||'',
+    e.kind||'',
+    e.packs??'',
+    e.qty??'',
+    e.paidTotal??''
+  ].join(' ').toLocaleLowerCase('zh-TW');
+}
 function renderHistory(){
+  const q=(document.getElementById('historySearchBox')?.value||'').trim().toLocaleLowerCase('zh-TW');
   const events=[...db.events]
     .filter(historyEventVisible)
     .filter(e=>historyFilter==='全部'||historyCategory(e)===historyFilter)
+    .filter(e=>!q||historySearchText(e).includes(q))
     .sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0));
 
   const size=Math.max(1,historyPageSize||10);
@@ -1413,7 +1624,7 @@ function renderHistory(){
 
   document.getElementById('historyList').innerHTML=pageEvents.length?pageEvents.map(e=>{
     const i=db.items.find(x=>x.id===e.itemId);
-    const nm=i?itemDisplayName(i):(e.itemType?`${e.itemType}｜${e.itemName||'已刪除品項'}`:(e.itemName||'已刪除品項'));
+    const nm=historyDisplayName(e,i);
     const cat=categoryForEvent(e);
     let desc='';
 
@@ -1424,7 +1635,10 @@ function renderHistory(){
       const priceText=hasPaid?`・實付 NT$ ${money(paid)}・平均 NT$ ${money(avgPack)}/包`:'・價格未記錄';
       desc=`採購 ${e.packs} 包，共增加 ${e.qty} 片${priceText}${e.store?`・${esc(e.store)}`:''}${e.promo?`・${esc(e.promo)}`:''}`;
     }else if(e.kind==='create'){
-      desc=`建立品項・起始庫存 ${fmt(e.qty||0)} 片${e.detail?`・${esc(e.detail)}`:''}`;
+      desc=`新增品項${e.detail?`・${esc(e.detail)}`:''}`;
+    }else if(e.kind==='modify'){
+      const detail=String(e.detail||'品項資料');
+      desc=detail.startsWith('修改：')?esc(detail):`修改：${esc(detail)}`;
     }else if(e.kind==='delete'){
       desc=`刪除品項・刪除當下庫存 ${fmt(e.qty||0)} 片${e.detail?`・${esc(e.detail)}`:''}`;
     }else if(['usage','adjustment','manage'].includes(e.kind)){
@@ -1459,68 +1673,99 @@ function deleteHistoryEvent(id){
   showToast('記錄已刪除','delete');
 }
 
-// ---------- 新增品項：第一步 ----------
+// ---------- 新增品項 ----------
 function applyNewKeyTypeLock(){
   const el=document.getElementById('newKeyType');
   el.disabled=newKeyTypeLocked;
   el.classList.toggle('key-locked',newKeyTypeLocked);
 }
 function openNewStockKey(defaultType='日用',lockType=false){
-  pendingNewKey=null;
-  pendingItemDraft=null;
   newKeyTypeLocked=lockType;
   document.getElementById('newKeyBrand').value='';
   document.getElementById('newKeySeries').value='';
   document.getElementById('newKeyLength').value='0';
   document.getElementById('newKeyType').value=defaultType;
   document.getElementById('newKeyPantsType').value='日用褲';
+  document.getElementById('newKeyPackSize').value='0';
+  document.getElementById('newKeyNote').value='';
+  document.querySelector('input[name="newKeyLocationMode"][value="預設"]').checked=true;
+  document.getElementById('newKeyLocationOther').value='';
   applyNewKeyTypeLock();
   syncNewKeyFields();
+  syncNewKeyLocation();
   openModal('newStockKeyModal');
 }
 function cancelNewStockKey(){
-  pendingNewKey=null;
-  pendingItemDraft=null;
   newKeyTypeLocked=false;
   applyNewKeyTypeLock();
   closeModal('newStockKeyModal');
 }
 function syncNewKeyFields(){
-  const pants=document.getElementById('newKeyType').value==='褲型';
+  const typeEl=document.getElementById('newKeyType');
+  applyTypeSelectColor(typeEl);
+  const pants=typeEl.value==='褲型';
   document.getElementById('newKeyLengthField').style.display=pants?'none':'block';
   document.getElementById('newKeyPantsField').style.display=pants?'block':'none';
 }
-function checkNewStockDuplicate(){
+function syncNewKeyLocation(){
+  const mode=document.querySelector('input[name="newKeyLocationMode"]:checked')?.value||'預設';
+  const input=document.getElementById('newKeyLocationOther');
+  input.style.display=mode==='其他'?'block':'none';
+  if(mode==='其他')setTimeout(()=>input.focus(),0);
+}
+function getNewKeyLocation(){
+  const mode=document.querySelector('input[name="newKeyLocationMode"]:checked')?.value||'預設';
+  return mode==='預設'?'預設':document.getElementById('newKeyLocationOther').value.trim();
+}
+function saveNewStockKey(){
   const type=document.getElementById('newKeyType').value;
   const brand=document.getElementById('newKeyBrand').value.trim();
   const series=document.getElementById('newKeySeries').value.trim();
   const length=type==='褲型'?0:numVal('newKeyLength');
   const pantsType=type==='褲型'?document.getElementById('newKeyPantsType').value:'';
+  const packSize=safeNonnegInt('newKeyPackSize');
+  const location=getNewKeyLocation();
+  const note=document.getElementById('newKeyNote').value.trim();
+
   if(!brand||!series)return alert('品牌和系列 / 款式要填喔～');
   if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
+  if(packSize<=0)return alert('每包片數請輸入 1 以上的整數。');
+  if(!location)return alert('選擇「其他」時，請輸入放置位置。');
 
-  const data={brand,series,type,length,pantsType};
+  const data={
+    brand,series,type,length,pantsType,packSize,location,note,
+    unopenedPacks:0,openedQty:0,qty:0
+  };
+
   const dup=findDuplicate(data);
-  pendingNewKey=data;
-
   if(dup){
-    duplicateItemId=dup.id;
-    document.getElementById('duplicateText').textContent=`「${itemName(dup)}」已經存在，小棉倉不再建立重複品項，直接帶妳去盤點這筆庫存。`;
+    duplicateReturnModal='newStockKeyModal';
+    document.getElementById('duplicateText').textContent=
+      `「${itemName(dup)}」（放置位置：${dup.location||'預設'}）已經存在，請調整目前輸入的品項資料後再儲存。`;
     closeModal('newStockKeyModal');
     openModal('duplicateModal');
     return;
   }
 
-  closeModal('newStockKeyModal');
-  openItemEditor('',false,data);
-}
-function goManageDuplicate(){
-  pendingNewKey=null;
-  pendingItemDraft=null;
+  const savedId=uid();
+  db.items.push({id:savedId,...data,createdAt:Date.now()});
+  db.events.push({
+    id:uid(),kind:'create',itemId:savedId,itemName:itemName(data),itemType:data.type,qty:0,
+    detail:`每包 ${packSize} 片・放置位置 ${location}`,
+    date:today(),createdAt:Date.now()
+  });
+
   newKeyTypeLocked=false;
+  applyNewKeyTypeLock();
+  saveDB();
+  closeModal('newStockKeyModal');
+  showToast('新增成功！');
+}
+function returnFromDuplicate(){
   closeModal('duplicateModal');
-  openManageStock(duplicateItemId);
-  duplicateItemId='';
+  const target=duplicateReturnModal;
+  duplicateReturnModal='';
+  if(target)openModal(target);
 }
 
 // ---------- 盤點：單一品項 ----------
@@ -1532,6 +1777,7 @@ function openManageStock(preselectId=''){
   const sel=document.getElementById('manageItem');
   sel.innerHTML=[...db.items].sort(compareItems).map(i=>`<option value="${i.id}">${esc(manageOptionText(i))}</option>`).join('');
   if(preselectId&&db.items.some(i=>i.id===preselectId))sel.value=preselectId;
+  document.getElementById('manageDate').value=today();
   syncManageStock();
   openModal('manageStockModal');
 }
@@ -1560,18 +1806,20 @@ function saveManageStock(){
   if(!i)return;
   const packs=safeNonnegInt('manageUnopenedPacks');
   const opened=safeNonnegInt('manageOpenedQty');
+  const date=document.getElementById('manageDate').value;
   if(opened>Number(i.packSize||0))return alert(`已拆封剩餘片數不能大於每包 ${i.packSize} 片。`);
+  if(!date)return alert('請選擇盤點日期。');
 
   const oldQty=calcQty(i);
   const newQty=Number(i.packSize||0)*packs+opened;
   i.unopenedPacks=packs;
   i.openedQty=opened;
   syncQty(i);
-  i.lastCountDate=today();
+  i.lastCountDate=date;
 
   db.events.push({
     id:uid(),kind:'manage',itemId:i.id,itemName:itemName(i),itemType:i.type,
-    oldQty,newQty,qty:Math.abs(newQty-oldQty),date:today(),createdAt:Date.now()
+    oldQty,newQty,qty:Math.abs(newQty-oldQty),date,createdAt:Date.now()
   });
 
   saveDB();
@@ -1669,7 +1917,10 @@ function openLinerCount(){
 function countRow(i,prefix){
   return `<div class="countrow ${typeClass(i.type)}">
     <div class="countrow-top">
-      <div><b>${esc(i.type)}｜${esc(itemName(i))}</b><div class="smallnote">每包 ${fmt(i.packSize)} 片</div></div>
+      <div>
+        <b>${esc(itemDisplayName(i))}</b>
+        <div class="smallnote">放置位置：${esc(i.location||'預設')}</div>
+      </div>
       <div class="total">系統目前 ${fmt(calcQty(i))} 片</div>
     </div>
     <div class="count-fields">
@@ -1724,166 +1975,162 @@ function saveCounts(type){
 function savePeriodCount(){saveCounts('period')}
 function saveLinerCount(){saveCounts('liner')}
 
-// ---------- 品項第二步 ----------
-function setItemKeyLocked(locked){
-  const readonlyIds=['itemBrand','itemSeries','itemLength'];
-  const disabledIds=['itemType','itemPantsType'];
-  readonlyIds.forEach(id=>{
-    const el=document.getElementById(id);
-    el.readOnly=locked;
-    el.classList.toggle('key-locked',locked);
-  });
-  disabledIds.forEach(id=>{
-    const el=document.getElementById(id);
-    el.disabled=locked;
-    el.classList.toggle('key-locked',locked);
-  });
-}
-function captureItemDraft(){
-  pendingItemDraft={
-    packSize:document.getElementById('itemPackSize').value,
-    unopenedPacks:document.getElementById('itemUnopenedPacks').value,
-    openedQty:document.getElementById('itemOpenedQty').value,
-    location:document.getElementById('itemLocation').value,
-    note:document.getElementById('itemNote').value
-  };
-}
-function backToNewStockKey(){
-  captureItemDraft();
-  const p=pendingNewKey;
-  closeModal('itemModal');
-  setItemKeyLocked(false);
-
-  if(p){
-    document.getElementById('newKeyBrand').value=p.brand||'';
-    document.getElementById('newKeySeries').value=p.series||'';
-    document.getElementById('newKeyType').value=p.type||'日用';
-    document.getElementById('newKeyLength').value=p.type==='褲型'?'0':(p.length||'0');
-    document.getElementById('newKeyPantsType').value=p.pantsType||'日用褲';
-    syncNewKeyFields();
-  }
-  applyNewKeyTypeLock();
-  openModal('newStockKeyModal');
-}
+// ---------- 庫存：編輯品項資料 ----------
 function syncItemFields(){
-  const pants=document.getElementById('itemType').value==='褲型';
+  const typeEl=document.getElementById('itemType');
+  applyTypeSelectColor(typeEl);
+  const pants=typeEl.value==='褲型';
   document.getElementById('lengthField').style.display=pants?'none':'block';
   document.getElementById('pantsField').style.display=pants?'block':'none';
 }
-function updateItemTotalPreview(){
-  const packSize=safeNonnegInt('itemPackSize');
-  const packs=safeNonnegInt('itemUnopenedPacks');
-  const opened=safeNonnegInt('itemOpenedQty');
-  document.getElementById('itemTotalPreview').innerHTML=
-    `小棉倉自動計算：<b>${fmt(packs)} 包 × ${fmt(packSize)} 片 ＋ ${fmt(opened)} 片 ＝ ${fmt(packSize*packs+opened)} 片</b> ✨`;
+function setItemLocation(value){
+  const location=String(value||'預設').trim()||'預設';
+  const isDefault=location==='預設';
+
+  document.getElementById('itemLocationDefault').checked=isDefault;
+  document.getElementById('itemLocationOtherRadio').checked=!isDefault;
+  document.getElementById('itemLocationOther').value=isDefault?'':location;
+  syncItemLocation(false);
 }
-function openItemEditor(id='',fromPurchase=false,prefill=null){
+function syncItemLocation(focusOther=true){
+  const mode=document.querySelector('input[name="itemLocationMode"]:checked')?.value||'預設';
+  const input=document.getElementById('itemLocationOther');
+  input.style.display=mode==='其他'?'block':'none';
+  if(mode==='其他'&&focusOther)setTimeout(()=>input.focus(),0);
+}
+function getItemLocation(){
+  const mode=document.querySelector('input[name="itemLocationMode"]:checked')?.value||'預設';
+  return mode==='預設'?'預設':document.getElementById('itemLocationOther').value.trim();
+}
+function openItemEditor(id=''){
   const i=db.items.find(x=>x.id===id);
-  const p=prefill||pendingNewKey;
-  const fromKeyStep=!i&&!!p;
-  const d=fromKeyStep?pendingItemDraft:null;
+  if(!i)return;
 
-  document.getElementById('itemModalTitle').textContent=i?'編輯品項':'新增品項';
-  document.getElementById('itemModalDesc').textContent=i
-    ?'品項基本資料可以調整；每包片數建立後固定，不在這裡變更。'
-    :(fromKeyStep?'上一步的品項辨識資料已帶入並鎖定；這一步補上每包片數與起始庫存即可。':'確認品項資料與起始庫存。');
+  document.getElementById('editItemId').value=i.id;
+  document.getElementById('itemBrand').value=i.brand||'';
+  document.getElementById('itemSeries').value=i.series||'';
+  document.getElementById('itemType').value=i.type||'日用';
+  document.getElementById('itemPantsType').value=i.pantsType||'日用褲';
+  document.getElementById('itemLength').value=i.length||'0';
+  document.getElementById('itemPackSize').value=Number(i.packSize||0);
+  document.getElementById('itemNote').value=i.note||'';
 
-  document.getElementById('editItemId').value=i?.id||'';
-  document.getElementById('itemBrand').value=i?.brand||p?.brand||'';
-  document.getElementById('itemSeries').value=i?.series||p?.series||'';
-  document.getElementById('itemType').value=i?.type||p?.type||'日用';
-  document.getElementById('itemPantsType').value=i?.pantsType||p?.pantsType||'日用褲';
-  document.getElementById('itemLength').value=i?.length||p?.length||'0';
-
-  const ps=document.getElementById('itemPackSize');
-  ps.value=i?.packSize??d?.packSize??'0';
-  ps.readOnly=!!i;
-  ps.classList.toggle('locked-input',!!i);
-  ps.setAttribute('aria-readonly',i?'true':'false');
-
-  document.getElementById('itemUnopenedPacks').value=i?.unopenedPacks??d?.unopenedPacks??0;
-  document.getElementById('itemOpenedQty').value=i?.openedQty??d?.openedQty??0;
-  document.getElementById('itemLocation').value=i?.location??d?.location??'';
-  document.getElementById('itemNote').value=i?.note??d?.note??'';
-
+  setItemLocation(i.location||'預設');
   syncItemFields();
-  setItemKeyLocked(fromKeyStep);
-  document.getElementById('itemBackBtn').style.display=fromKeyStep?'block':'none';
-  updateItemTotalPreview();
   openModal('itemModal');
 }
 function cancelItemEditor(){
-  pendingNewKey=null;
-  pendingItemDraft=null;
-  newKeyTypeLocked=false;
-  setItemKeyLocked(false);
-  document.getElementById('itemBackBtn').style.display='none';
   closeModal('itemModal');
+}
+function itemChangeDetails(oldItem,newItem){
+  const changes=[];
+  const same=(a,b)=>String(a??'')===String(b??'');
+  const show=v=>{
+    const s=String(v??'').trim();
+    return s||'（空白）';
+  };
+
+  if(!same(oldItem.brand,newItem.brand)){
+    changes.push(`品牌：${show(oldItem.brand)} → ${show(newItem.brand)}`);
+  }
+  if(!same(oldItem.series,newItem.series)){
+    changes.push(`系列 / 款式：${show(oldItem.series)} → ${show(newItem.series)}`);
+  }
+  if(!same(oldItem.type,newItem.type)){
+    changes.push(`類型：${show(oldItem.type)} → ${show(newItem.type)}`);
+  }
+
+  if(newItem.type==='褲型'){
+    if(!same(oldItem.pantsType,newItem.pantsType)||oldItem.type!=='褲型'){
+      const oldValue=oldItem.type==='褲型'?show(oldItem.pantsType):'（非褲型）';
+      changes.push(`褲型款式：${oldValue} → ${show(newItem.pantsType)}`);
+    }
+  }else{
+    if(Number(oldItem.length||0)!==Number(newItem.length||0)||oldItem.type==='褲型'){
+      const oldValue=oldItem.type==='褲型'?'（褲型無長度）':`${Number(oldItem.length||0)}cm`;
+      changes.push(`長度：${oldValue} → ${Number(newItem.length||0)}cm`);
+    }
+  }
+
+  if(!same(oldItem.location||'預設',newItem.location||'預設')){
+    changes.push(`放置位置：${show(oldItem.location||'預設')} → ${show(newItem.location||'預設')}`);
+  }
+  if(!same(oldItem.note,newItem.note)){
+    changes.push(`備註：${show(oldItem.note)} → ${show(newItem.note)}`);
+  }
+
+  return changes;
 }
 function saveItem(){
   const id=document.getElementById('editItemId').value;
+  const old=db.items.find(x=>x.id===id);
+  if(!old)return;
+
   const type=document.getElementById('itemType').value;
-  const packSize=safeNonnegInt('itemPackSize');
-  const unopened=safeNonnegInt('itemUnopenedPacks');
-  const opened=safeNonnegInt('itemOpenedQty');
   const length=type==='褲型'?0:numVal('itemLength');
+  const location=getItemLocation();
 
   const data={
     brand:document.getElementById('itemBrand').value.trim(),
     series:document.getElementById('itemSeries').value.trim(),
-    type,length,
+    type,
+    length,
     pantsType:type==='褲型'?document.getElementById('itemPantsType').value:'',
-    packSize,unopenedPacks:unopened,openedQty:opened,
-    location:document.getElementById('itemLocation').value.trim(),
+    packSize:Number(old.packSize||0),
+    unopenedPacks:Number(old.unopenedPacks||0),
+    openedQty:Number(old.openedQty||0),
+    location,
     note:document.getElementById('itemNote').value.trim()
   };
+  data.qty=calcQty(data);
 
   if(!data.brand||!data.series)return alert('品牌和系列 / 款式要填喔～');
   if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
-  if(packSize<=0)return alert('每包片數請輸入 1 以上的整數。');
-  if(opened>packSize)return alert(`已拆封剩餘片數不能大於每包 ${packSize} 片。`);
+  if(!location)return alert('選擇「其他」時，請輸入放置位置。');
 
   const dup=findDuplicate(data,id);
   if(dup){
-    duplicateItemId=dup.id;
-    document.getElementById('duplicateText').textContent=`「${itemName(dup)}」已經存在，小棉倉不會再建立或改成重複品項。`;
+    duplicateReturnModal='itemModal';
+    document.getElementById('duplicateText').textContent=
+      `「${itemName(dup)}」（放置位置：${dup.location||'預設'}）已經存在，請調整目前編輯的品項資料後再儲存。`;
     closeModal('itemModal');
     openModal('duplicateModal');
     return;
   }
 
-  data.qty=packSize*unopened+opened;
-
-  if(id){
-    const old=db.items.find(x=>x.id===id);
-    data.packSize=Number(old.packSize||0);
-    data.qty=data.packSize*unopened+opened;
-    Object.assign(old,data);
-  }else{
-    const savedId=uid();
-    db.items.push({id:savedId,...data,createdAt:Date.now()});
-    db.events.push({
-      id:uid(),kind:'create',itemId:savedId,itemName:itemName(data),itemType:data.type,qty:data.qty,
-      detail:`未拆 ${unopened} 包・已拆封 ${opened} 片`,
-      date:today(),createdAt:Date.now()
-    });
+  const changes=itemChangeDetails(old,data);
+  if(!changes.length){
+    closeModal('itemModal');
+    return;
   }
 
-  pendingNewKey=null;
-  pendingItemDraft=null;
-  newKeyTypeLocked=false;
-  setItemKeyLocked(false);
-  document.getElementById('itemBackBtn').style.display='none';
+  Object.assign(old,data);
+
+  db.events.push({
+    id:uid(),
+    kind:'modify',
+    itemId:old.id,
+    itemName:itemName(old),
+    itemType:old.type,
+    qty:calcQty(old),
+    detail:changes.join('・'),
+    date:today(),
+    createdAt:Date.now()
+  });
+
   saveDB();
   closeModal('itemModal');
-  if(!id)showToast('新增成功！');
+  showToast('修改成功！');
 }
 function deleteItemById(id){
   const i=db.items.find(x=>x.id===id);
   if(!i)return;
-  if(confirm(`確定刪除「${itemName(i)}」嗎？\n歷史記錄會保留。`)){
+  if(confirm(`確定刪除「${itemName(i)}」嗎？\n刪除記錄可在「記錄」分頁確認。`)){
+    db.events.forEach(e=>{
+      if(e.itemId===i.id&&!e.itemLocation)e.itemLocation=i.location||'預設';
+    });
     db.events.push({
-      id:uid(),kind:'delete',itemId:i.id,itemName:itemName(i),itemType:i.type,qty:calcQty(i),
+      id:uid(),kind:'delete',itemId:i.id,itemName:itemName(i),itemType:i.type,itemLocation:i.location||'預設',qty:calcQty(i),
       detail:`未拆 ${fmt(i.unopenedPacks)} 包・已拆封 ${fmt(i.openedQty)} 片`,
       date:today(),createdAt:Date.now()
     });
@@ -1937,27 +2184,6 @@ function downloadBlob(blob,name){
   a.download=name;
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-
-function loadDemoData(){
-  if(db.items.length&&!confirm('目前已有資料。示範資料會加在現有資料後面，確定嗎？'))return;
-  const demos=[
-    {brand:'蘇菲',series:'天然空氣感',type:'護墊',length:14.5,packSize:40,unopenedPacks:1,openedQty:25},
-    {brand:'靠得住',series:'涼感日用',type:'日用',length:23,packSize:14,unopenedPacks:3,openedQty:8},
-    {brand:'蘇菲',series:'超熟睡',type:'夜用',length:35,packSize:8,unopenedPacks:1,openedQty:4},
-    {brand:'好自在',series:'安心褲',type:'褲型',length:0,pantsType:'日用褲',packSize:4,unopenedPacks:2,openedQty:0}
-  ];
-  demos.forEach(d=>{
-    d.qty=d.packSize*d.unopenedPacks+d.openedQty;
-    const id=uid();
-    db.items.push({id,...d,location:'',note:'',createdAt:Date.now()});
-    db.events.push({
-      id:uid(),kind:'create',itemId:id,itemName:itemName(d),itemType:d.type,qty:d.qty,
-      detail:'示範資料',date:today(),createdAt:Date.now()
-    });
-  });
-  saveDB();
-  closeModal('settingsModal');
 }
 
 renderAll();

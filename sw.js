@@ -1,4 +1,4 @@
-const CACHE='pad-pantry-v1.4';
+const CACHE='pad-pantry-v1.5';
 
 const ASSETS=[
   './',
@@ -26,7 +26,7 @@ self.addEventListener('activate',event=>{
   );
 });
 
-// 小棉倉本身的檔案採 network-first：有網路就拿最新版，沒網路才用快取。
+// 有網路時優先抓最新版；離線時才使用快取
 self.addEventListener('fetch',event=>{
   const request=event.request;
 
