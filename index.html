@@ -200,6 +200,28 @@ button:active{transform:scale(.98)}
   background:linear-gradient(180deg,#fff,#fffafd);box-shadow:0 3px 10px rgba(140,80,100,.04)
 }
 .history strong{display:block}.history small{color:var(--muted)}
+.history-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+.history-head strong{flex:1;min-width:0}
+.history-delete{
+  flex:0 0 auto;
+  width:30px;height:30px;
+  border:1px solid #efc8d0;
+  border-radius:10px;
+  background:#fff6f7;
+  color:#a94755;
+  font-size:20px;
+  line-height:1;
+  display:grid;
+  place-items:center;
+  padding:0;
+}
+.history-delete:hover{background:#fdecee}
+.history-delete:active{transform:scale(.96)}
 .search{
   width:100%;border:1px solid var(--line);border-radius:15px;padding:11px 12px;
   margin:8px 0 12px;background:#fffafd;outline:none
@@ -804,6 +826,7 @@ function normalizeDB(v){
     syncQty(i);
   });
   v.events.forEach(e=>{
+    if(!e.id)e.id=uid();
     if(e.paidTotal===undefined&&e.price!==undefined)e.paidTotal=Number(e.price||0);
     delete e.price;
   });
@@ -995,8 +1018,32 @@ function renderHistory(){
       desc=`${historyCountLabel(e)}：${fmt(e.oldQty)} → ${fmt(e.newQty)} 片`;
     }
 
-    return `<div class="history"><strong><span class="history-cat ${cat.cls}">${cat.text}</span>${esc(nm)}</strong><small>${esc(e.date||'')}・${desc}</small></div>`;
+    return `<div class="history">
+      <div class="history-head">
+        <strong><span class="history-cat ${cat.cls}">${cat.text}</span>${esc(nm)}</strong>
+        <button class="history-delete" type="button" title="刪除這筆記錄" aria-label="刪除這筆記錄" data-event-id="${esc(e.id)}" onclick="deleteHistoryEvent(this.dataset.eventId)">×</button>
+      </div>
+      <small>${esc(e.date||'')}・${desc}</small>
+    </div>`;
   }).join(''):'<div class="empty">還沒有記錄</div>';
+}
+
+function deleteHistoryEvent(id){
+  const e=db.events.find(x=>x.id===id);
+  if(!e)return;
+
+  const i=db.items.find(x=>x.id===e.itemId);
+  const nm=i?itemDisplayName(i):(e.itemType?`${e.itemType}｜${e.itemName||'已刪除品項'}`:(e.itemName||'已刪除品項'));
+  const cat=categoryForEvent(e).text;
+
+  const ok=confirm(
+    `確定刪除這筆「${cat}」記錄嗎？\n${nm}\n\n只會刪除這筆歷史記錄，不會改變目前庫存。`
+  );
+  if(!ok)return;
+
+  db.events=db.events.filter(x=>x.id!==id);
+  saveDB();
+  showToast('記錄已刪除','delete');
 }
 
 // ---------- 新增品項：第一步 ----------
