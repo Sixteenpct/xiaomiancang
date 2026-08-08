@@ -401,7 +401,8 @@ button:active{transform:scale(.98)}
 #newStockKeyModal,
 #itemModal,
 #manageStockModal,
-#linerModal{
+#linerModal,
+#settingsModal{
   align-items:flex-start;
   padding:6vh 10px 10px;
 }
@@ -410,14 +411,16 @@ button:active{transform:scale(.98)}
   #newStockKeyModal,
   #itemModal,
   #manageStockModal,
-  #linerModal{
+  #linerModal,
+  #settingsModal{
     align-items:flex-start;
     padding:3vh 0 0;
   }
   #newStockKeyModal .modal,
   #itemModal .modal,
   #manageStockModal .modal,
-  #linerModal .modal{
+  #linerModal .modal,
+  #settingsModal .modal{
     border-radius:25px 25px 0 0;
     max-height:94vh;
   }
@@ -457,6 +460,71 @@ button:active{transform:scale(.98)}
 
 
 .history-cat.purchase{background:#fff0d6;color:#8a672d}
+
+
+/* 設定頁：先建立雲端同步區塊，之後接 Supabase 時直接沿用 */
+.settings-group{
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:15px;
+  margin:12px 0;
+  background:linear-gradient(180deg,#fff,#fffafd);
+}
+.settings-group.cloud{
+  background:linear-gradient(180deg,#fbfaff,#f5f1ff);
+  border-color:#ddd3f3;
+}
+.settings-group h4{
+  margin:0 0 5px;
+  font-size:15px;
+}
+.settings-group .group-desc{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+  margin-bottom:12px;
+}
+.cloud-status{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+  margin:10px 0 12px;
+}
+.cloud-status-item{
+  border:1px solid rgba(221,211,243,.9);
+  border-radius:15px;
+  padding:10px 11px;
+  background:rgba(255,255,255,.72);
+}
+.cloud-status-item small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+.cloud-status-item b{
+  display:block;
+  font-size:14px;
+}
+.cloud-status-item .pending{color:#765f9d}
+.btn.cloud-disabled,
+.btn.cloud-disabled:disabled{
+  width:100%;
+  background:#eee9f7;
+  border-color:#d9cfee;
+  color:#77658f;
+  cursor:not-allowed;
+  opacity:1;
+  transform:none;
+}
+.settings-version{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  margin:12px 0 2px;
+}
+@media(max-width:620px){
+  .cloud-status{grid-template-columns:1fr}
+}
 
 </style>
 </head>
@@ -609,10 +677,45 @@ button:active{transform:scale(.98)}
 
 <!-- Settings -->
 <div class="modalback" id="settingsModal"><div class="modal">
-  <h3>⚙️ 設定與資料</h3><p>資料目前存在這台裝置的瀏覽器。可以隨時匯出備份，再到另一台裝置匯入。</p>
-  <div class="notice"><b>跨裝置同步：</b>這版已經可以在手機與電腦瀏覽器使用，但兩台裝置不會自動同步。之後若要真正「同一份雲端資料」，只要再接 Supabase / Firebase 這類雲端資料庫即可，不需要重做介面。</div>
-  <div class="grid2"><button class="btn" onclick="exportBackup()">⬇️ 匯出備份 JSON</button><label class="btn" style="text-align:center">⬆️ 匯入備份 JSON<input id="importFile" type="file" accept="application/json" style="display:none" onchange="importBackup(event)"></label></div>
-  <div class="field"><button class="btn" onclick="loadDemoData()">載入示範資料</button></div>
+  <h3>⚙️ 設定與資料</h3>
+  <p>管理小棉倉的雲端同步、資料備份與測試工具。</p>
+
+  <div class="settings-group cloud">
+    <h4>☁️ 雲端同步</h4>
+    <div class="group-desc">目前仍使用這台裝置的瀏覽器資料；接上 Supabase 後，手機與電腦會改為共用同一份雲端資料。</div>
+    <div class="cloud-status">
+      <div class="cloud-status-item">
+        <small>同步狀態</small>
+        <b id="cloudSyncStatus" class="pending">尚未連接</b>
+      </div>
+      <div class="cloud-status-item">
+        <small>雲端服務</small>
+        <b>Supabase</b>
+      </div>
+      <div class="cloud-status-item">
+        <small>最後同步</small>
+        <b id="cloudLastSync">尚未同步</b>
+      </div>
+    </div>
+    <button id="cloudSyncBtn" class="btn cloud-disabled" type="button" disabled>☁️ Supabase 尚未連接</button>
+  </div>
+
+  <div class="settings-group">
+    <h4>💾 資料備份</h4>
+    <div class="group-desc">JSON 備份會繼續保留；即使之後使用雲端同步，也可以另外存一份手動備份。</div>
+    <div class="grid2">
+      <button class="btn" onclick="exportBackup()">⬇️ 匯出備份 JSON</button>
+      <label class="btn" style="text-align:center">⬆️ 匯入備份 JSON<input id="importFile" type="file" accept="application/json" style="display:none" onchange="importBackup(event)"></label>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <h4>🧪 測試工具</h4>
+    <div class="group-desc">需要測試畫面或流程時，可以快速加入示範資料。</div>
+    <button class="btn" onclick="loadDemoData()">載入示範資料</button>
+  </div>
+
+  <div class="settings-version">小棉倉 v1.0</div>
   <div class="modal-actions"><button class="btn primary grow" onclick="closeModal('settingsModal')">關閉</button></div>
 </div></div>
 
