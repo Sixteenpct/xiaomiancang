@@ -1,4 +1,4 @@
-const CACHE='pad-pantry-v1.2';
+const CACHE='pad-pantry-v1.3';
 
 const ASSETS=[
   './',
@@ -9,7 +9,6 @@ const ASSETS=[
   './icon-512.png'
 ];
 
-// 安裝：先準備離線所需檔案
 self.addEventListener('install',event=>{
   event.waitUntil(
     caches.open(CACHE).then(cache=>cache.addAll(ASSETS))
@@ -17,7 +16,6 @@ self.addEventListener('install',event=>{
   self.skipWaiting();
 });
 
-// 啟用：清除舊版快取
 self.addEventListener('activate',event=>{
   event.waitUntil(
     caches.keys()
@@ -28,7 +26,7 @@ self.addEventListener('activate',event=>{
   );
 });
 
-// 有網路時優先抓最新版；離線時才使用快取
+// 小棉倉本身的檔案採 network-first：有網路就拿最新版，沒網路才用快取。
 self.addEventListener('fetch',event=>{
   const request=event.request;
 
@@ -40,7 +38,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith(
     fetch(request)
       .then(response=>{
-        if(response && response.ok){
+        if(response&&response.ok){
           const copy=response.clone();
           caches.open(CACHE).then(cache=>cache.put(request,copy));
         }
