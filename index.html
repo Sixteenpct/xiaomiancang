@@ -298,6 +298,16 @@ button:active{transform:scale(.98)}
   background:#fffafd;color:var(--muted);font-size:13px;line-height:1.55
 }
 .readonly-info b{color:var(--ink);font-size:15px}
+.cascade-full-name{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  background:#faf8f9;
+  color:#6f6468;
+  font-size:15px;
+  font-weight:650;
+  line-height:1.5;
+}
 .price-help{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
 
 
@@ -367,6 +377,8 @@ button:active{transform:scale(.98)}
 
 @media(max-width:760px){
   .quick-primary,.quick-secondary{grid-template-columns:1fr}
+  #purchaseModal .grid2,
+  #manageStockModal .grid2{grid-template-columns:1fr}
 }
 
 
@@ -418,24 +430,17 @@ button:active{transform:scale(.98)}
 }
 
 
-.countrow.type-liner,
-#manageStockModal .modal.type-liner{
+.countrow.type-liner{
   background:#f1fbf7;border-color:#cfe9df;
 }
-.countrow.type-day,
-#manageStockModal .modal.type-day{
+.countrow.type-day{
   background:#fff2f6;border-color:#f0d3dc;
 }
-.countrow.type-night,
-#manageStockModal .modal.type-night{
+.countrow.type-night{
   background:#f5f1ff;border-color:#ddd3f3;
 }
-.countrow.type-pants,
-#manageStockModal .modal.type-pants{
+.countrow.type-pants{
   background:#fff8eb;border-color:#eeddbd;
-}
-#manageStockModal .modal{
-  transition:background .18s ease,border-color .18s ease;
 }
 
 
@@ -475,23 +480,6 @@ button:active{transform:scale(.98)}
     border-radius:25px 25px 0 0;
     max-height:94vh;
   }
-}
-
-
-#purchaseModal .modal.type-liner{
-  background:#f1fbf7;border-color:#cfe9df;
-}
-#purchaseModal .modal.type-day{
-  background:#fff2f6;border-color:#f0d3dc;
-}
-#purchaseModal .modal.type-night{
-  background:#f5f1ff;border-color:#ddd3f3;
-}
-#purchaseModal .modal.type-pants{
-  background:#fff8eb;border-color:#eeddbd;
-}
-#purchaseModal .modal{
-  transition:background .18s ease,border-color .18s ease;
 }
 
 
@@ -804,12 +792,12 @@ button:active{transform:scale(.98)}
   </div>
 
   <div class="field">
-    <label>放置位置 *</label>
+    <label>存放位置 *</label>
     <div class="location-choice">
       <label><input type="radio" name="newKeyLocationMode" value="預設" checked onchange="syncNewKeyLocation()">預設</label>
       <label><input type="radio" name="newKeyLocationMode" value="其他" onchange="syncNewKeyLocation()">其他</label>
     </div>
-    <input id="newKeyLocationOther" class="location-other-input" placeholder="請輸入放置位置" style="display:none">
+    <input id="newKeyLocationOther" class="location-other-input" placeholder="請輸入存放位置" style="display:none">
   </div>
 
   <div class="field">
@@ -832,7 +820,20 @@ button:active{transform:scale(.98)}
 <!-- Manage stock -->
 <div class="modalback" id="manageStockModal"><div class="modal">
   <h3>📦 盤點：單一品項</h3><p>選擇一個現有品項，填實際未拆封包數與已拆封剩餘片數。</p>
-  <div class="field"><label>品項 *</label><select id="manageItem" onchange="syncManageStock()"></select></div>
+  <div class="grid2">
+    <div class="field"><label>類型 *</label><select id="manageType" class="type-select" onchange="cascadeManage()"></select></div>
+    <div class="field"><label>品牌 *</label><select id="manageBrand" onchange="cascadeManage()"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>系列 / 款式 *</label><select id="manageSeries" onchange="cascadeManage()"></select></div>
+    <div class="field"><label>規格 *</label><select id="manageSpec" onchange="cascadeManage()"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>每包片數 *</label><select id="managePackSize" onchange="cascadeManage()"></select></div>
+    <div class="field"><label>存放位置 *</label><select id="manageLocation" onchange="cascadeManage()"></select></div>
+  </div>
+  <div class="field"><label>完整名稱</label><div class="readonly-info cascade-full-name" id="manageFullName"></div></div>
+  <input type="hidden" id="manageItem">
   <div class="grid2"><div class="field"><label>未拆封包數 *</label><input id="manageUnopenedPacks" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateManagePreview()"></div><div class="field"><label>已拆封剩餘片數 *</label><input id="manageOpenedQty" type="text" inputmode="numeric" value="0" oninput="cleanIntegerInput(this);updateManagePreview()"></div></div>
   <div class="field"><label>盤點日期 *</label><input id="manageDate" type="date"></div>
   <div class="total-preview manage-preview" id="managePreview"></div>
@@ -842,7 +843,20 @@ button:active{transform:scale(.98)}
 <!-- Purchase -->
 <div class="modalback" id="purchaseModal"><div class="modal">
   <h3>🛍️ 新增採購</h3><p>若尚未建立目標品項，請先新增品項；這裡只登記本次採購資訊。</p>
-  <div class="field"><label>品項 *</label><select id="purchaseItem" onchange="syncPurchaseItem()"></select></div>
+  <div class="grid2">
+    <div class="field"><label>類型 *</label><select id="purchaseType" class="type-select" onchange="cascadePurchase()"></select></div>
+    <div class="field"><label>品牌 *</label><select id="purchaseBrand" onchange="cascadePurchase()"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>系列 / 款式 *</label><select id="purchaseSeries" onchange="cascadePurchase()"></select></div>
+    <div class="field"><label>規格 *</label><select id="purchaseSpec" onchange="cascadePurchase()"></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>每包片數 *</label><select id="purchasePackSize" onchange="cascadePurchase()"></select></div>
+    <div class="field"><label>存放位置 *</label><select id="purchaseLocation" onchange="cascadePurchase()"></select></div>
+  </div>
+  <div class="field"><label>完整名稱</label><div class="readonly-info cascade-full-name" id="purchaseFullName"></div></div>
+  <input type="hidden" id="purchaseItem">
   <div class="grid2">
     <div class="field"><label>買了幾包 *</label><input id="purchasePacks" type="text" inputmode="numeric" value="1" oninput="cleanIntegerInput(this);updatePurchaseHint()"></div>
     <div class="field"><label>購買日期 *</label><input id="purchaseDate" type="date"></div>
@@ -907,12 +921,12 @@ button:active{transform:scale(.98)}
   </div>
 
   <div class="field">
-    <label>放置位置 *</label>
+    <label>存放位置 *</label>
     <div class="location-choice">
       <label><input id="itemLocationDefault" type="radio" name="itemLocationMode" value="預設" onchange="syncItemLocation()">預設</label>
       <label><input id="itemLocationOtherRadio" type="radio" name="itemLocationMode" value="其他" onchange="syncItemLocation()">其他</label>
     </div>
-    <input id="itemLocationOther" class="location-other-input" placeholder="請輸入放置位置" style="display:none">
+    <input id="itemLocationOther" class="location-other-input" placeholder="請輸入存放位置" style="display:none">
   </div>
 
   <div class="field"><label>備註</label><textarea id="itemNote" placeholder="（有需要再填就好～）"></textarea></div>
@@ -980,13 +994,13 @@ button:active{transform:scale(.98)}
     </div>
   </div>
 
-  <div class="settings-version">小棉倉 v1.5</div>
+  <div class="settings-version">小棉倉 v1.6</div>
   <div class="modal-actions"><button class="btn primary grow" onclick="closeModal('settingsModal')">關閉</button></div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const APP_VERSION='1.5';
+const APP_VERSION='1.6';
 const KEY='pad_inventory_cloud_v1';
 const CLOUD_META_KEY='pad_inventory_cloud_meta_v1';
 const LAST_LOGIN_EMAIL_KEY='pad_inventory_last_login_email';
@@ -1430,6 +1444,56 @@ function manageOptionText(i){
   const spec=i.type==='褲型'?(i.pantsType||'褲型'):(i.length?`${i.length}cm`:'未填尺寸');
   return `${i.type}｜${i.brand}｜${i.series}｜${spec}｜每包 ${fmt(i.packSize)} 片`;
 }
+function itemSpecValue(i){
+  return i.type==='褲型'?(i.pantsType||'褲型'):(i.length?`${i.length}cm`:'未填尺寸');
+}
+function itemFullName(i){
+  return [
+    i.type||'',
+    i.brand||'',
+    i.series||'',
+    itemSpecValue(i),
+    `每包 ${fmt(i.packSize)} 片`
+  ].filter(Boolean).join(' | ');
+}
+function itemFullNameWithLocation(i){
+  return `${itemFullName(i)}；存放位置：${i.location||'預設'}`;
+}
+function updateCascadeFullName(prefix){
+  const itemId=document.getElementById(`${prefix}Item`)?.value||'';
+  const i=db.items.find(x=>x.id===itemId);
+  const el=document.getElementById(`${prefix}FullName`);
+  if(el)el.textContent=i?itemFullNameWithLocation(i):'';
+}
+function smartOptionSort(a,b){
+  if(['護墊','日用','夜用','褲型'].includes(a)&&['護墊','日用','夜用','褲型'].includes(b)){
+    return typeSortOrder(a)-typeSortOrder(b);
+  }
+  if(a.endsWith('cm')&&b.endsWith('cm')){
+    return Number.parseFloat(a)-Number.parseFloat(b);
+  }
+  return a.localeCompare(b,'zh-Hant');
+}
+function uniqueOptions(values){
+  return [...new Set(values.map(v=>String(v??'').trim()).filter(Boolean))].sort(smartOptionSort);
+}
+function setCascadeOptions(id,values,preferred=''){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const options=uniqueOptions(values);
+  el.innerHTML=options.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  if(preferred&&options.includes(String(preferred)))el.value=String(preferred);
+  else if(options.length)el.value=options[0];
+}
+function setPackSizeOptions(id,values,preferred=''){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const options=[...new Set(values.map(v=>Number(v||0)).filter(v=>v>0))].sort((a,b)=>a-b);
+  el.innerHTML=options.map(v=>`<option value="${v}">${v} 片</option>`).join('');
+  const p=Number(preferred||0);
+  if(p&&options.includes(p))el.value=String(p);
+  else if(options.length)el.value=String(options[0]);
+}
 function itemKeyFromData(x){
   const type=x.type;
   return [
@@ -1437,6 +1501,7 @@ function itemKeyFromData(x){
     normText(x.series),
     type,
     type==='褲型'?normText(x.pantsType):String(Number(x.length||0)),
+    String(Number(x.packSize||0)),
     normText(x.location||'預設')
   ].join('§');
 }
@@ -1470,7 +1535,11 @@ function compareItems(a,b){
 
   const brandDiff=String(a.brand||'').localeCompare(String(b.brand||''),'zh-Hant');
   if(brandDiff!==0)return brandDiff;
-  return String(a.series||'').localeCompare(String(b.series||''),'zh-Hant');
+
+  const seriesDiff=String(a.series||'').localeCompare(String(b.series||''),'zh-Hant');
+  if(seriesDiff!==0)return seriesDiff;
+
+  return Number(a.packSize||0)-Number(b.packSize||0);
 }
 
 function showView(id){
@@ -1490,7 +1559,7 @@ function card(i){
     <div class="item-top">
       <div>
         <h4>${esc(itemDisplayName(i))}</h4>
-        <div class="meta">放置位置：${esc(i.location||'預設')}<br>每包 ${fmt(i.packSize)} 片・${itemStockText(i)}</div>
+        <div class="meta">存放位置：${esc(i.location||'預設')}<br>每包 ${fmt(i.packSize)} 片・${itemStockText(i)}</div>
       </div>
       <div class="qty">${fmt(i.unopenedPacks)}<small style="font-size:12px;color:var(--muted);font-weight:500"> 包</small><span style="font-size:16px;font-weight:650;color:var(--muted)"> + </span>${fmt(i.openedQty)}<small style="font-size:12px;color:var(--muted);font-weight:500"> 片</small><span style="font-size:15px;font-weight:650;color:var(--muted)"> = </span>${fmt(calcQty(i))}<small style="font-size:12px;color:var(--muted);font-weight:500"> 片</small></div>
     </div>
@@ -1567,6 +1636,11 @@ function historyDisplayName(e,i){
   const location=String(i?.location??e.itemLocation??'預設').trim()||'預設';
   return location==='預設'?base:`${base}｜${location}`;
 }
+function normalizeHistoryLocationText(value){
+  return String(value??'')
+    .replaceAll('放置位置','存放位置')
+    .replaceAll('存放地點','存放位置');
+}
 function applyHistoryPageSize(){
   const raw=Number(document.getElementById('historyPageSize').value||0);
   historyPageSize=Math.max(1,raw);
@@ -1579,19 +1653,44 @@ function changeHistoryPage(delta){
   historyPage=Math.max(1,historyPage+delta);
   renderHistory();
 }
+function historyDateTime(e){
+  const date=String(e.date||'').trim();
+  const ts=Number(e.createdAt||0);
+
+  let time='';
+  if(ts>0){
+    const d=new Date(ts);
+    const hh=String(d.getHours()).padStart(2,'0');
+    const mm=String(d.getMinutes()).padStart(2,'0');
+    const ss=String(d.getSeconds()).padStart(2,'0');
+    time=`${hh}:${mm}:${ss}`;
+  }
+
+  if(date&&time)return `${date} ${time}`;
+  if(date)return date;
+
+  if(ts>0){
+    const d=new Date(ts);
+    const yyyy=d.getFullYear();
+    const mo=String(d.getMonth()+1).padStart(2,'0');
+    const da=String(d.getDate()).padStart(2,'0');
+    return `${yyyy}-${mo}-${da} ${time}`;
+  }
+  return '';
+}
 function historySearchText(e){
   const i=db.items.find(x=>x.id===e.itemId);
   const cat=categoryForEvent(e).text;
   const name=historyDisplayName(e,i);
   return [
-    e.date||'',
+    historyDateTime(e),
     cat,
     name,
     e.itemType||'',
     e.itemName||'',
     e.itemLocation||'',
-    e.detail||'',
-    e.context||'',
+    normalizeHistoryLocationText(e.detail),
+    normalizeHistoryLocationText(e.context),
     e.store||'',
     e.promo||'',
     e.kind||'',
@@ -1635,12 +1734,14 @@ function renderHistory(){
       const priceText=hasPaid?`・實付 NT$ ${money(paid)}・平均 NT$ ${money(avgPack)}/包`:'・價格未記錄';
       desc=`採購 ${e.packs} 包，共增加 ${e.qty} 片${priceText}${e.store?`・${esc(e.store)}`:''}${e.promo?`・${esc(e.promo)}`:''}`;
     }else if(e.kind==='create'){
-      desc=`新增品項${e.detail?`・${esc(e.detail)}`:''}`;
+      const detail=normalizeHistoryLocationText(e.detail);
+      desc=`新增品項${detail?`・${esc(detail)}`:''}`;
     }else if(e.kind==='modify'){
-      const detail=String(e.detail||'品項資料');
+      const detail=normalizeHistoryLocationText(e.detail||'品項資料');
       desc=detail.startsWith('修改：')?esc(detail):`修改：${esc(detail)}`;
     }else if(e.kind==='delete'){
-      desc=`刪除品項・刪除當下庫存 ${fmt(e.qty||0)} 片${e.detail?`・${esc(e.detail)}`:''}`;
+      const detail=normalizeHistoryLocationText(e.detail);
+      desc=`刪除品項・刪除當下庫存 ${fmt(e.qty||0)} 片${detail?`・${esc(detail)}`:''}`;
     }else if(['usage','adjustment','manage'].includes(e.kind)){
       desc=`${historyCountLabel(e)}：${fmt(e.oldQty)} → ${fmt(e.newQty)} 片`;
     }
@@ -1650,7 +1751,7 @@ function renderHistory(){
         <strong><span class="history-cat ${cat.cls}">${cat.text}</span>${esc(nm)}</strong>
         <button class="history-delete" type="button" title="刪除這筆記錄" aria-label="刪除這筆記錄" data-event-id="${esc(e.id)}" onclick="deleteHistoryEvent(this.dataset.eventId)">×</button>
       </div>
-      <small>${esc(e.date||'')}・${desc}</small>
+      <small>${esc(historyDateTime(e))}・${desc}</small>
     </div>`;
   }).join(''):'<div class="empty">還沒有記錄</div>';
 }
@@ -1730,7 +1831,7 @@ function saveNewStockKey(){
   if(!brand||!series)return alert('品牌和系列 / 款式要填喔～');
   if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
   if(packSize<=0)return alert('每包片數請輸入 1 以上的整數。');
-  if(!location)return alert('選擇「其他」時，請輸入放置位置。');
+  if(!location)return alert('選擇「其他」時，請輸入存放位置。');
 
   const data={
     brand,series,type,length,pantsType,packSize,location,note,
@@ -1741,7 +1842,7 @@ function saveNewStockKey(){
   if(dup){
     duplicateReturnModal='newStockKeyModal';
     document.getElementById('duplicateText').textContent=
-      `「${itemName(dup)}」（放置位置：${dup.location||'預設'}）已經存在，請調整目前輸入的品項資料後再儲存。`;
+      `「${itemName(dup)}」（存放位置：${dup.location||'預設'}）已經存在，請調整目前輸入的品項資料後再儲存。`;
     closeModal('newStockKeyModal');
     openModal('duplicateModal');
     return;
@@ -1751,7 +1852,7 @@ function saveNewStockKey(){
   db.items.push({id:savedId,...data,createdAt:Date.now()});
   db.events.push({
     id:uid(),kind:'create',itemId:savedId,itemName:itemName(data),itemType:data.type,qty:0,
-    detail:`每包 ${packSize} 片・放置位置 ${location}`,
+    detail:`每包 ${packSize} 片・存放位置 ${location}`,
     date:today(),createdAt:Date.now()
   });
 
@@ -1774,20 +1875,65 @@ function openManageStock(preselectId=''){
     openNewStockKey();
     return;
   }
-  const sel=document.getElementById('manageItem');
-  sel.innerHTML=[...db.items].sort(compareItems).map(i=>`<option value="${i.id}">${esc(manageOptionText(i))}</option>`).join('');
-  if(preselectId&&db.items.some(i=>i.id===preselectId))sel.value=preselectId;
+
+  const target=db.items.find(i=>i.id===preselectId)||[...db.items].sort(compareItems)[0];
+  setCascadeOptions('manageType',db.items.map(i=>i.type),target?.type);
+  cascadeManage(target);
   document.getElementById('manageDate').value=today();
-  syncManageStock();
   openModal('manageStockModal');
+}
+function cascadeManage(preferred=null){
+  const typeEl=document.getElementById('manageType');
+  applyTypeSelectColor(typeEl);
+
+  let xs=db.items.filter(i=>i.type===typeEl.value);
+
+  setCascadeOptions(
+    'manageBrand',
+    xs.map(i=>i.brand),
+    preferred?.brand||document.getElementById('manageBrand')?.value||''
+  );
+  xs=xs.filter(i=>i.brand===document.getElementById('manageBrand').value);
+
+  setCascadeOptions(
+    'manageSeries',
+    xs.map(i=>i.series),
+    preferred?.series||document.getElementById('manageSeries')?.value||''
+  );
+  xs=xs.filter(i=>i.series===document.getElementById('manageSeries').value);
+
+  setCascadeOptions(
+    'manageSpec',
+    xs.map(itemSpecValue),
+    preferred?itemSpecValue(preferred):(document.getElementById('manageSpec')?.value||'')
+  );
+  xs=xs.filter(i=>itemSpecValue(i)===document.getElementById('manageSpec').value);
+
+  setPackSizeOptions(
+    'managePackSize',
+    xs.map(i=>Number(i.packSize||0)),
+    preferred?Number(preferred.packSize||0):Number(document.getElementById('managePackSize')?.value||0)
+  );
+
+  const packSize=Number(document.getElementById('managePackSize').value||0);
+  xs=xs.filter(i=>Number(i.packSize||0)===packSize);
+
+  setCascadeOptions(
+    'manageLocation',
+    xs.map(i=>i.location||'預設'),
+    preferred?.location||document.getElementById('manageLocation')?.value||''
+  );
+
+  const location=document.getElementById('manageLocation').value||'預設';
+  const selected=xs.find(i=>(i.location||'預設')===location)||xs[0];
+  document.getElementById('manageItem').value=selected?.id||'';
+  updateCascadeFullName('manage');
+
+  if(selected)syncManageStock();
 }
 function syncManageStock(){
   const i=db.items.find(x=>x.id===document.getElementById('manageItem').value);
   if(!i)return;
-
-  const modal=document.querySelector('#manageStockModal .modal');
-  modal.classList.remove('type-liner','type-day','type-night','type-pants','type-all');
-  modal.classList.add(typeClass(i.type));
 
   document.getElementById('manageUnopenedPacks').value=Number(i.unopenedPacks||0);
   document.getElementById('manageOpenedQty').value=Number(i.openedQty||0);
@@ -1803,7 +1949,7 @@ function updateManagePreview(){
 }
 function saveManageStock(){
   const i=db.items.find(x=>x.id===document.getElementById('manageItem').value);
-  if(!i)return;
+  if(!i)return alert('請先選擇品項。');
   const packs=safeNonnegInt('manageUnopenedPacks');
   const opened=safeNonnegInt('manageOpenedQty');
   const date=document.getElementById('manageDate').value;
@@ -1834,9 +1980,11 @@ function openPurchase(preselectId=''){
     openNewStockKey();
     return;
   }
-  const sel=document.getElementById('purchaseItem');
-  sel.innerHTML=[...db.items].sort(compareItems).map(i=>`<option value="${i.id}">${esc(manageOptionText(i))}</option>`).join('');
-  if(preselectId&&db.items.some(i=>i.id===preselectId))sel.value=preselectId;
+
+  const target=db.items.find(i=>i.id===preselectId)||[...db.items].sort(compareItems)[0];
+  setCascadeOptions('purchaseType',db.items.map(i=>i.type),target?.type);
+  cascadePurchase(target);
+
   document.getElementById('purchasePacks').value='1';
   document.getElementById('purchasePaidTotal').value='0';
   document.getElementById('purchaseStore').value='';
@@ -1845,13 +1993,58 @@ function openPurchase(preselectId=''){
   syncPurchaseItem();
   openModal('purchaseModal');
 }
+function cascadePurchase(preferred=null){
+  const typeEl=document.getElementById('purchaseType');
+  applyTypeSelectColor(typeEl);
+
+  let xs=db.items.filter(i=>i.type===typeEl.value);
+
+  setCascadeOptions(
+    'purchaseBrand',
+    xs.map(i=>i.brand),
+    preferred?.brand||document.getElementById('purchaseBrand')?.value||''
+  );
+  xs=xs.filter(i=>i.brand===document.getElementById('purchaseBrand').value);
+
+  setCascadeOptions(
+    'purchaseSeries',
+    xs.map(i=>i.series),
+    preferred?.series||document.getElementById('purchaseSeries')?.value||''
+  );
+  xs=xs.filter(i=>i.series===document.getElementById('purchaseSeries').value);
+
+  setCascadeOptions(
+    'purchaseSpec',
+    xs.map(itemSpecValue),
+    preferred?itemSpecValue(preferred):(document.getElementById('purchaseSpec')?.value||'')
+  );
+  xs=xs.filter(i=>itemSpecValue(i)===document.getElementById('purchaseSpec').value);
+
+  setPackSizeOptions(
+    'purchasePackSize',
+    xs.map(i=>Number(i.packSize||0)),
+    preferred?Number(preferred.packSize||0):Number(document.getElementById('purchasePackSize')?.value||0)
+  );
+
+  const packSize=Number(document.getElementById('purchasePackSize').value||0);
+  xs=xs.filter(i=>Number(i.packSize||0)===packSize);
+
+  setCascadeOptions(
+    'purchaseLocation',
+    xs.map(i=>i.location||'預設'),
+    preferred?.location||document.getElementById('purchaseLocation')?.value||''
+  );
+
+  const location=document.getElementById('purchaseLocation').value||'預設';
+  const selected=xs.find(i=>(i.location||'預設')===location)||xs[0];
+  document.getElementById('purchaseItem').value=selected?.id||'';
+  updateCascadeFullName('purchase');
+
+  if(selected)syncPurchaseItem();
+}
 function syncPurchaseItem(){
   const i=db.items.find(x=>x.id===document.getElementById('purchaseItem').value);
   if(!i)return;
-
-  const modal=document.querySelector('#purchaseModal .modal');
-  modal.classList.remove('type-liner','type-day','type-night','type-pants','type-all');
-  modal.classList.add(typeClass(i.type));
 
   document.getElementById('purchaseItemInfo').innerHTML=
     `每包片數：<b>${fmt(i.packSize)} 片</b><br>目前庫存：${itemStockText(i)}（共 ${fmt(calcQty(i))} 片）`;
@@ -1872,7 +2065,7 @@ function savePurchase(){
   const packs=safeNonnegInt('purchasePacks');
   const paid=numVal('purchasePaidTotal');
   const date=document.getElementById('purchaseDate').value;
-  if(!i)return;
+  if(!i)return alert('請先選擇品項。');
   if(packs<=0)return alert('「買了幾包」請輸入 1 以上的整數。');
   if(!Number.isFinite(paid)||paid<0)return alert('請填「本次實付總額」。');
   if(!date)return alert('請選擇購買日期。');
@@ -1918,8 +2111,8 @@ function countRow(i,prefix){
   return `<div class="countrow ${typeClass(i.type)}">
     <div class="countrow-top">
       <div>
-        <b>${esc(itemDisplayName(i))}</b>
-        <div class="smallnote">放置位置：${esc(i.location||'預設')}</div>
+        <b>${esc(itemFullName(i))}</b>
+        <div class="smallnote">存放位置：${esc(i.location||'預設')}</div>
       </div>
       <div class="total">系統目前 ${fmt(calcQty(i))} 片</div>
     </div>
@@ -2053,7 +2246,7 @@ function itemChangeDetails(oldItem,newItem){
   }
 
   if(!same(oldItem.location||'預設',newItem.location||'預設')){
-    changes.push(`放置位置：${show(oldItem.location||'預設')} → ${show(newItem.location||'預設')}`);
+    changes.push(`存放位置：${show(oldItem.location||'預設')} → ${show(newItem.location||'預設')}`);
   }
   if(!same(oldItem.note,newItem.note)){
     changes.push(`備註：${show(oldItem.note)} → ${show(newItem.note)}`);
@@ -2086,13 +2279,13 @@ function saveItem(){
 
   if(!data.brand||!data.series)return alert('品牌和系列 / 款式要填喔～');
   if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
-  if(!location)return alert('選擇「其他」時，請輸入放置位置。');
+  if(!location)return alert('選擇「其他」時，請輸入存放位置。');
 
   const dup=findDuplicate(data,id);
   if(dup){
     duplicateReturnModal='itemModal';
     document.getElementById('duplicateText').textContent=
-      `「${itemName(dup)}」（放置位置：${dup.location||'預設'}）已經存在，請調整目前編輯的品項資料後再儲存。`;
+      `「${itemName(dup)}」（存放位置：${dup.location||'預設'}）已經存在，請調整目前編輯的品項資料後再儲存。`;
     closeModal('itemModal');
     openModal('duplicateModal');
     return;
