@@ -189,6 +189,41 @@ button:active{transform:scale(.98)}
 }
 .field textarea{min-height:74px;resize:vertical}
 .modal-actions{display:flex;gap:10px;position:sticky;bottom:-21px;background:#fffafd;padding:16px 0 0}
+
+/* 新增採購／所有品項盤點：內容區獨立捲動，底部按鈕固定 */
+.transaction-modal{
+  padding:0 !important;
+  overflow:hidden !important;
+  display:flex;
+  flex-direction:column;
+}
+.transaction-modal-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:21px 21px 14px;
+}
+.modal-actions.transaction-modal-actions{
+  position:static !important;
+  flex:0 0 auto;
+  margin:0 !important;
+  padding:14px 21px calc(18px + env(safe-area-inset-bottom)) !important;
+  background:#fffafd;
+  border-top:1px solid var(--line);
+  box-shadow:0 -8px 18px rgba(151,88,111,.045);
+}
+
+/* 這兩個視窗不要一路延伸到螢幕最下方 */
+#purchaseModal,
+#periodModal{
+  align-items:flex-start;
+  padding:4vh 10px 10vh;
+}
+#purchaseModal .transaction-modal,
+#periodModal .transaction-modal{
+  max-height:84vh;
+}
+
 .btn{
   border:1px solid var(--line);background:#fff;border-radius:15px;padding:11px 14px;color:var(--ink)
 }
@@ -403,28 +438,70 @@ button:active{transform:scale(.98)}
   background:#fdecee;border-color:#efbec6;color:#a2404e;
 }
 
-.history-toolbar{
-  display:flex;gap:10px;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;margin:4px 0 14px;
+.search-clear-wrap{position:relative;width:100%;margin:8px 0 12px}
+.search-clear-wrap .search{margin:0;padding-right:42px;height:46px}
+.search-clear-btn{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border:0;border-radius:9px;background:transparent;
+  color:#9a828c;font:400 20px/1 Arial,sans-serif;display:flex;align-items:center;justify-content:center;
+  padding:0 0 2px;margin:0
 }
-.history-page-size{
-  display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;
-}
-.history-page-size select{
-  width:82px;border:1px solid var(--line);border-radius:12px;
-  padding:8px 10px;background:#fff;color:var(--ink);text-align:center;
-}
-.history-pagination{display:flex;gap:8px;align-items:center}
-.history-pagination button{
-  border:1px solid var(--line);background:#fff;border-radius:12px;
-  padding:8px 12px;color:var(--ink)
-}
-.history-pagination button:disabled{opacity:.42;cursor:not-allowed}
-.history-page-info{font-size:13px;color:var(--muted);min-width:92px;text-align:center}
+.search-clear-btn:hover{background:#fff0f5;color:#72515e}
+.search-clear-btn:active{transform:translateY(-50%) scale(.95)}
 
-@media(max-width:560px){
-  .history-toolbar{align-items:stretch}
-  .history-page-size,.history-pagination{justify-content:center;width:100%}
+.history-search-row{
+  display:grid;grid-template-columns:minmax(240px,1fr) auto auto 42px;grid-template-rows:auto 46px;
+  gap:5px 10px;align-items:stretch;margin:8px 0 12px
+}
+.history-search-row .search{grid-column:1;grid-row:2;margin:0;height:46px}
+.history-date-field{min-width:198px;display:grid;grid-template-rows:auto 46px;grid-row:1/3}
+.history-date-field label{
+  display:block;font-size:12px;font-weight:750;color:var(--muted);margin:0 0 5px 2px;align-self:end
+}
+.history-date-input-row{
+  display:grid;grid-template-columns:minmax(140px,1fr) 42px;gap:6px;height:46px
+}
+.history-date-field input{
+  width:100%;min-width:0;height:46px;border:1px solid var(--line);border-radius:15px;padding:10px 11px;
+  background:#fffafd;color:var(--ink);outline:none
+}
+.history-date-field input:focus{border-color:#e8a5b9;box-shadow:0 0 0 3px rgba(238,173,193,.18)}
+.history-today-btn{
+  width:42px;height:46px;padding:0;border-radius:13px;
+  background:#fff8fb;border-color:#ead3dc;color:#8f5c70;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:none;margin:0
+}
+.history-today-btn:hover{background:#ffeef4;border-color:#dfbdc9;color:#754357;transform:translateY(-1px)}
+.history-reset-field{min-width:42px;display:grid;grid-template-rows:auto 46px;grid-column:4;grid-row:1/3}
+.history-reset-field .history-reset-label{
+  display:block;font-size:12px;font-weight:750;margin:0 0 5px 2px;visibility:hidden;align-self:end
+}
+.history-reset-btn{
+  width:42px;height:46px;padding:0;border-radius:13px;
+  background:#fffafd;border-color:#ead9df;color:#9a828c;font:400 20px/1 Arial,sans-serif;
+  display:flex;align-items:center;justify-content:center;box-shadow:none;margin:0
+}
+.history-reset-btn:hover{background:#fff0f5;border-color:#e4cbd4;color:#72515e;transform:translateY(-1px)}
+.excel-export-btn{
+  background:linear-gradient(145deg,#effbf3,#d7efdf);
+  border-color:#b7d9c2;color:#397052;font-weight:800;
+  box-shadow:0 4px 11px rgba(67,121,84,.10)
+}
+.excel-export-btn:hover{
+  background:linear-gradient(145deg,#e5f7eb,#c9e7d4);
+  border-color:#a6cfb4;transform:translateY(-1px);
+  box-shadow:0 5px 13px rgba(67,121,84,.14)
+}
+
+@media(max-width:700px){
+  .history-search-row{grid-template-columns:1fr 42px;grid-template-rows:46px auto auto;gap:8px}
+  .history-search-row .search{grid-column:1/-1;grid-row:1;height:46px}
+  .history-date-field{min-width:0;grid-row:auto}
+  .history-date-field:first-of-type{grid-column:1/-1;grid-row:2}
+  .history-date-field:nth-of-type(2){grid-column:1;grid-row:3}
+  .history-date-input-row{grid-template-columns:minmax(0,1fr) 42px}
+  .history-reset-field{grid-column:2;grid-row:3;min-width:42px}
+  .history-reset-btn{width:42px;height:46px;justify-self:end}
 }
 
 
@@ -477,6 +554,24 @@ button:active{transform:scale(.98)}
   #authModal .modal{
     border-radius:25px 25px 0 0;
     max-height:94vh;
+  }
+
+  #purchaseModal,
+  #periodModal{
+    padding:3vh 0 9vh;
+  }
+  #purchaseModal .transaction-modal,
+  #periodModal .transaction-modal{
+    max-height:86vh;
+    border-radius:25px 25px 18px 18px;
+  }
+  #purchaseModal .transaction-modal-body,
+  #periodModal .transaction-modal-body{
+    padding:18px 16px 12px;
+  }
+  #purchaseModal .transaction-modal-actions,
+  #periodModal .transaction-modal-actions{
+    padding:13px 16px calc(18px + env(safe-area-inset-bottom)) !important;
   }
 }
 
@@ -708,7 +803,10 @@ button:active{transform:scale(.98)}
   <main id="inventory" class="view">
     <div class="section">
       <div class="section-head"><div><h3>🎀 我的棉棉收藏</h3><div class="sub">品牌、系列、尺寸都收得整整齊齊</div></div><button class="btn primary" onclick="openNewStockKey()">＋ 新增品項</button></div>
-      <input id="searchBox" class="search" placeholder="搜尋品牌、系列、尺寸、位置…" oninput="renderInventory()" />
+      <div class="search-clear-wrap">
+        <input id="searchBox" class="search" placeholder="搜尋品牌、系列、尺寸、位置…" oninput="renderInventory()" />
+        <button class="search-clear-btn" type="button" title="清除所有篩選條件" aria-label="清除所有篩選條件" onclick="clearInventorySearch()">×</button>
+      </div>
       <div class="chips" id="typeChips"></div>
       <div id="inventoryList" class="inventory" style="margin-top:12px"></div>
     </div>
@@ -716,33 +814,30 @@ button:active{transform:scale(.98)}
 
   <main id="history" class="view">
     <div class="section">
-      <div class="section-head"><div><h3>📖 小棉倉日記</h3><div class="sub">採購和每次盤點的變化都幫妳留著</div></div><button class="btn" onclick="exportCSV()">匯出 CSV</button></div>
-      <input id="historySearchBox" class="search" placeholder="搜尋日期、品項、類型、通路、修改內容…" oninput="historyPage=1;renderHistory()" />
+      <div class="section-head"><div><h3>📖 小棉倉日記</h3><div class="sub">採購和每次盤點的變化都幫妳留著</div></div><button class="btn excel-export-btn" type="button" onclick="exportHistoryExcel()">📗 匯出 Excel</button></div>
+      <div class="history-search-row">
+        <input id="historySearchBox" class="search" placeholder="搜尋日期、品項、類型、通路、修改內容…" oninput="renderHistory()" />
+        <div class="history-date-field">
+          <label for="historyDateFrom">起日</label>
+          <div class="history-date-input-row">
+            <input id="historyDateFrom" type="date" onchange="syncHistoryDateBounds('from')">
+            <button class="btn history-today-btn" type="button" title="起日帶入今天" aria-label="起日帶入今天" onclick="setHistoryDateToday('from')">今</button>
+          </div>
+        </div>
+        <div class="history-date-field">
+          <label for="historyDateTo">迄日</label>
+          <div class="history-date-input-row">
+            <input id="historyDateTo" type="date" onchange="syncHistoryDateBounds('to')">
+            <button class="btn history-today-btn" type="button" title="迄日帶入今天" aria-label="迄日帶入今天" onclick="setHistoryDateToday('to')">今</button>
+          </div>
+        </div>
+        <div class="history-reset-field">
+          <span class="history-reset-label" aria-hidden="true">清除</span>
+          <button class="btn history-reset-btn" type="button" title="清除所有篩選條件" aria-label="清除所有篩選條件" onclick="resetHistoryFilters()">×</button>
+        </div>
+      </div>
       <div class="history-filter-wrap">
         <div class="chips history-filter-chips" id="historyFilterChips"></div>
-      </div>
-      <div class="history-toolbar">
-        <div class="history-page-size">
-          <span>每頁顯示</span>
-          <select id="historyPageSize" onchange="applyHistoryPageSize()">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20" selected>20</option>
-            <option value="25">25</option>
-            <option value="30">30</option>
-            <option value="35">35</option>
-            <option value="40">40</option>
-            <option value="45">45</option>
-            <option value="50">50</option>
-          </select>
-          <span>筆</span>
-        </div>
-        <div class="history-pagination">
-          <button id="historyPrevBtn" onclick="changeHistoryPage(-1)">上一頁</button>
-          <span class="history-page-info" id="historyPageInfo">第 1 / 1 頁</span>
-          <button id="historyNextBtn" onclick="changeHistoryPage(1)">下一頁</button>
-        </div>
       </div>
       <div id="historyList" class="list"></div>
     </div>
@@ -839,42 +934,46 @@ button:active{transform:scale(.98)}
 </div></div>
 
 <!-- Purchase -->
-<div class="modalback" id="purchaseModal"><div class="modal">
-  <h3>🛍️ 新增採購</h3><p>若尚未建立目標品項，請先新增品項；這裡只登記本次採購資訊。</p>
-  <div class="grid2">
-    <div class="field"><label>類型 *</label><select id="purchaseType" class="type-select" onchange="cascadePurchase()"></select></div>
-    <div class="field"><label>品牌 *</label><select id="purchaseBrand" onchange="cascadePurchase()"></select></div>
+<div class="modalback" id="purchaseModal"><div class="modal transaction-modal">
+  <div class="transaction-modal-body">
+    <h3>🛍️ 新增採購</h3><p>若尚未建立目標品項，請先新增品項；這裡只登記本次採購資訊。</p>
+    <div class="grid2">
+      <div class="field"><label>類型 *</label><select id="purchaseType" class="type-select" onchange="cascadePurchase()"></select></div>
+      <div class="field"><label>品牌 *</label><select id="purchaseBrand" onchange="cascadePurchase()"></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>系列 / 款式 *</label><select id="purchaseSeries" onchange="cascadePurchase()"></select></div>
+      <div class="field"><label>規格 *</label><select id="purchaseSpec" onchange="cascadePurchase()"></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>每包片數 *</label><select id="purchasePackSize" onchange="cascadePurchase()"></select></div>
+      <div class="field"><label>存放位置 *</label><select id="purchaseLocation" onchange="cascadePurchase()"></select></div>
+    </div>
+    <div class="field"><label>完整名稱</label><div class="readonly-info cascade-full-name" id="purchaseFullName"></div></div>
+    <input type="hidden" id="purchaseItem">
+    <div class="grid2">
+      <div class="field"><label>買了幾包 *</label><input id="purchasePacks" type="text" inputmode="numeric" value="1" oninput="cleanIntegerInput(this);updatePurchaseHint()"></div>
+      <div class="field"><label>購買日期 *</label><input id="purchaseDate" type="date"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>通路</label><input id="purchaseStore" placeholder="寶雅 / 蝦皮 / 全聯…"></div>
+      <div class="field"><label>本次實付總額（NT$） *</label><input id="purchasePaidTotal" type="text" inputmode="decimal" placeholder="例如 150" oninput="cleanMoneyInput(this);updatePurchaseHint()"><div class="price-help">79 折、2 包 150、買一送一都直接填這次實際付掉的總額。</div></div>
+    </div>
+    <div class="field"><label>優惠備註</label><input id="purchasePromo" placeholder="例如 79 折 / 2 包 150 / 買一送一"></div>
+    <div class="readonly-info" id="purchaseItemInfo"></div>
+    <div class="notice" id="purchaseHint"></div>
   </div>
-  <div class="grid2">
-    <div class="field"><label>系列 / 款式 *</label><select id="purchaseSeries" onchange="cascadePurchase()"></select></div>
-    <div class="field"><label>規格 *</label><select id="purchaseSpec" onchange="cascadePurchase()"></select></div>
-  </div>
-  <div class="grid2">
-    <div class="field"><label>每包片數 *</label><select id="purchasePackSize" onchange="cascadePurchase()"></select></div>
-    <div class="field"><label>存放位置 *</label><select id="purchaseLocation" onchange="cascadePurchase()"></select></div>
-  </div>
-  <div class="field"><label>完整名稱</label><div class="readonly-info cascade-full-name" id="purchaseFullName"></div></div>
-  <input type="hidden" id="purchaseItem">
-  <div class="grid2">
-    <div class="field"><label>買了幾包 *</label><input id="purchasePacks" type="text" inputmode="numeric" value="1" oninput="cleanIntegerInput(this);updatePurchaseHint()"></div>
-    <div class="field"><label>購買日期 *</label><input id="purchaseDate" type="date"></div>
-  </div>
-  <div class="grid2">
-    <div class="field"><label>通路</label><input id="purchaseStore" placeholder="寶雅 / 蝦皮 / 全聯…"></div>
-    <div class="field"><label>本次實付總額（NT$） *</label><input id="purchasePaidTotal" type="text" inputmode="decimal" placeholder="例如 150" oninput="cleanMoneyInput(this);updatePurchaseHint()"><div class="price-help">79 折、2 包 150、買一送一都直接填這次實際付掉的總額。</div></div>
-  </div>
-  <div class="field"><label>優惠備註</label><input id="purchasePromo" placeholder="例如 79 折 / 2 包 150 / 買一送一"></div>
-  <div class="readonly-info" id="purchaseItemInfo"></div>
-  <div class="notice" id="purchaseHint"></div>
-  <div class="modal-actions"><button class="btn grow" onclick="closeModal('purchaseModal')">取消</button><button class="btn primary grow" onclick="savePurchase()">加入庫存</button></div>
+  <div class="modal-actions transaction-modal-actions"><button class="btn grow" onclick="closeModal('purchaseModal')">取消</button><button class="btn primary grow" onclick="savePurchase()">加入庫存</button></div>
 </div></div>
 
 <!-- Period Count -->
-<div class="modalback" id="periodModal"><div class="modal">
-  <h3>🌷 盤點：所有品項</h3><p>依序確認現有品項，填實際未拆封包數與已拆封剩餘片數。</p>
-  <div id="periodRows"></div>
-  <div class="field"><label>盤點日期</label><input id="periodDate" type="date"></div>
-  <div class="modal-actions"><button class="btn grow" onclick="closeModal('periodModal')">取消</button><button class="btn primary grow" onclick="savePeriodCount()">完成</button></div>
+<div class="modalback" id="periodModal"><div class="modal transaction-modal">
+  <div class="transaction-modal-body">
+    <h3>🌷 盤點：所有品項</h3><p>依序確認現有品項，填實際未拆封包數與已拆封剩餘片數。</p>
+    <div id="periodRows"></div>
+    <div class="field"><label>盤點日期</label><input id="periodDate" type="date"></div>
+  </div>
+  <div class="modal-actions transaction-modal-actions"><button class="btn grow" onclick="closeModal('periodModal')">取消</button><button class="btn primary grow" onclick="savePeriodCount()">完成</button></div>
 </div></div>
 
 <!-- Liner Count -->
@@ -1013,9 +1112,7 @@ const TYPES=['全部','護墊','日用','夜用','褲型'];
 let filterType='全部';
 let duplicateReturnModal='';
 let newKeyTypeLocked=false;
-let historyPage=1;
 let historyFilter='全部';
-let historyPageSize=Math.max(1,Number(localStorage.getItem('pad_inventory_history_page_size')||20));
 let toastTimer=null;
 let currentUser=null;
 let cloudReady=false;
@@ -1025,6 +1122,11 @@ let cloudLoadSerial=0;
 let db=loadDB();
 
 function today(){const d=new Date();return d.toISOString().slice(0,10)}
+function localToday(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
 function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
 function fmt(n){return Number(n||0).toLocaleString('zh-TW')}
 function money(n){return Number(n||0).toLocaleString('zh-TW',{maximumFractionDigits:2})}
@@ -1578,6 +1680,14 @@ function renderInventory(){
     ?xs.sort(compareItems).map(card).join('')
     :'<div class="empty" style="grid-column:1/-1">還沒有符合的品項</div>';
 }
+function clearInventorySearch(){
+  const box=document.getElementById('searchBox');
+  if(box)box.value='';
+  filterType='全部';
+  renderTypeChips();
+  renderInventory();
+  box?.focus();
+}
 
 function categoryForEvent(e){
   if(e.kind==='purchase')return {text:'採購',cls:'purchase'};
@@ -1597,7 +1707,7 @@ function historyFilterClass(label){
          label==='盤點'?'filter-count':'filter-all';
 }
 function renderHistoryFilterChips(){
-  const labels=['全部','新增','採購','修改','刪除','盤點'];
+  const labels=['全部','新增','採購','盤點','修改','刪除'];
   const host=document.getElementById('historyFilterChips');
   if(!host)return;
   host.innerHTML=labels.map(label=>
@@ -1606,7 +1716,6 @@ function renderHistoryFilterChips(){
 }
 function setHistoryFilter(label){
   historyFilter=label;
-  historyPage=1;
   renderHistoryFilterChips();
   renderHistory();
 }
@@ -1639,17 +1748,90 @@ function normalizeHistoryLocationText(value){
     .replaceAll('放置位置','存放位置')
     .replaceAll('存放地點','存放位置');
 }
-function applyHistoryPageSize(){
-  const raw=Number(document.getElementById('historyPageSize').value||0);
-  historyPageSize=Math.max(1,raw);
-  document.getElementById('historyPageSize').value=String(historyPageSize);
-  localStorage.setItem('pad_inventory_history_page_size',String(historyPageSize));
-  historyPage=1;
+function resetHistoryFilters(){
+  const q=document.getElementById('historySearchBox');
+  const from=document.getElementById('historyDateFrom');
+  const to=document.getElementById('historyDateTo');
+  if(q)q.value='';
+  if(from){from.value='';from.max='';}
+  if(to){to.value='';to.min='';}
+  historyFilter='全部';
+  renderHistoryFilterChips();
   renderHistory();
 }
-function changeHistoryPage(delta){
-  historyPage=Math.max(1,historyPage+delta);
+function syncHistoryDateBounds(changed=''){
+  const from=document.getElementById('historyDateFrom');
+  const to=document.getElementById('historyDateTo');
+  if(!from||!to)return;
+
+  from.max=to.value||'';
+  to.min=from.value||'';
+
+  if(from.value&&to.value&&from.value>to.value){
+    if(changed==='from')to.value=from.value;
+    else from.value=to.value;
+  }
+
+  from.max=to.value||'';
+  to.min=from.value||'';
   renderHistory();
+}
+function setHistoryDateToday(which){
+  const id=which==='to'?'historyDateTo':'historyDateFrom';
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.value=localToday();
+  syncHistoryDateBounds(which==='to'?'to':'from');
+}
+function showHistoryToday(){
+  const from=document.getElementById('historyDateFrom');
+  if(from)from.value=localToday();
+  syncHistoryDateBounds('from');
+  showView('history');
+}
+function initHistoryFilters(){
+  const from=document.getElementById('historyDateFrom');
+  const to=document.getElementById('historyDateTo');
+  if(from&&!from.value)from.value=localToday();
+  if(to&&!to.value)to.value='';
+  if(from&&to){
+    from.max=to.value||'';
+    to.min=from.value||'';
+  }
+}
+function historyEventDate(e){
+  const direct=String(e.date||'').slice(0,10);
+  if(direct)return direct;
+  const ts=Number(e.createdAt||0);
+  if(!ts)return '';
+  const d=new Date(ts);
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function historyDateBoundary(value,isEnd=false){
+  if(!value)return null;
+  const parts=value.split('-').map(Number);
+  if(parts.length!==3||parts.some(x=>!Number.isFinite(x)))return null;
+  const [y,m,d]=parts;
+  return new Date(y,m-1,d,isEnd?23:0,isEnd?59:0,isEnd?59:0,isEnd?999:0).getTime();
+}
+function historyEventTimestamp(e){
+  const date=historyEventDate(e);
+  if(!date)return NaN;
+  const parts=date.split('-').map(Number);
+  if(parts.length!==3||parts.some(x=>!Number.isFinite(x)))return NaN;
+
+  let hh=0,mm=0,ss=0,ms=0;
+  const ts=Number(e.createdAt||0);
+  if(ts>0){
+    const d=new Date(ts);
+    hh=d.getHours();
+    mm=d.getMinutes();
+    ss=d.getSeconds();
+    ms=d.getMilliseconds();
+  }
+
+  return new Date(parts[0],parts[1]-1,parts[2],hh,mm,ss,ms).getTime();
 }
 function historyDateTime(e){
   const date=String(e.date||'').trim();
@@ -1699,27 +1881,23 @@ function historySearchText(e){
 }
 function renderHistory(){
   const q=(document.getElementById('historySearchBox')?.value||'').trim().toLocaleLowerCase('zh-TW');
+  const dateFrom=document.getElementById('historyDateFrom')?.value||'';
+  const dateTo=document.getElementById('historyDateTo')?.value||'';
+  const fromTime=historyDateBoundary(dateFrom,false);
+  const toTime=historyDateBoundary(dateTo,true);
   const events=[...db.events]
     .filter(historyEventVisible)
     .filter(e=>historyFilter==='全部'||historyCategory(e)===historyFilter)
+    .filter(e=>{
+      if(fromTime===null&&toTime===null)return true;
+      const eventTime=historyEventTimestamp(e);
+      if(!Number.isFinite(eventTime))return false;
+      return (fromTime===null||eventTime>=fromTime) && (toTime===null||eventTime<=toTime);
+    })
     .filter(e=>!q||historySearchText(e).includes(q))
     .sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0));
 
-  const size=Math.max(1,historyPageSize||10);
-  const totalPages=Math.max(1,Math.ceil(events.length/size));
-  if(historyPage>totalPages)historyPage=totalPages;
-  if(historyPage<1)historyPage=1;
-
-  const start=(historyPage-1)*size;
-  const pageEvents=events.slice(start,start+size);
-
-  const sizeEl=document.getElementById('historyPageSize');
-  if(sizeEl)sizeEl.value=String(size);
-  document.getElementById('historyPageInfo').textContent=`第 ${historyPage} / ${totalPages} 頁`;
-  document.getElementById('historyPrevBtn').disabled=historyPage<=1;
-  document.getElementById('historyNextBtn').disabled=historyPage>=totalPages;
-
-  document.getElementById('historyList').innerHTML=pageEvents.length?pageEvents.map(e=>{
+  document.getElementById('historyList').innerHTML=events.length?events.map(e=>{
     const i=db.items.find(x=>x.id===e.itemId);
     const nm=historyDisplayName(e,i);
     const cat=categoryForEvent(e);
@@ -1751,9 +1929,8 @@ function renderHistory(){
       </div>
       <small>${esc(historyDateTime(e))}・${desc}</small>
     </div>`;
-  }).join(''):'<div class="empty">還沒有記錄</div>';
+  }).join(''):'<div class="empty">沒有符合條件的記錄</div>';
 }
-
 function deleteHistoryEvent(id){
   const e=db.events.find(x=>x.id===id);
   if(!e)return;
@@ -1858,7 +2035,7 @@ function saveNewStockKey(){
   applyNewKeyTypeLock();
   saveDB();
   closeModal('newStockKeyModal');
-  showToast('新增成功！');
+  showToast('✨ 品項建立完成！接著可以新增採購');
 }
 function returnFromDuplicate(){
   closeModal('duplicateModal');
@@ -1969,7 +2146,7 @@ function saveManageStock(){
   saveDB();
   closeModal('manageStockModal');
   alert('記錄完成！');
-  showView('history');
+  showHistoryToday();
 }
 
 // ---------- 新增採購 ----------
@@ -2081,7 +2258,8 @@ function savePurchase(){
   });
   saveDB();
   closeModal('purchaseModal');
-  showToast('採購成功！');
+  showToast('🛍️ 採購完成！');
+  showHistoryToday();
 }
 
 // ---------- 盤點：所有品項 / 護墊 ----------
@@ -2161,7 +2339,7 @@ function saveCounts(type){
   saveDB();
   closeModal(type==='period'?'periodModal':'linerModal');
   alert('記錄完成！');
-  showView('history');
+  showHistoryToday();
 }
 function savePeriodCount(){saveCounts('period')}
 function saveLinerCount(){saveCounts('liner')}
@@ -2331,7 +2509,7 @@ function deleteItemById(id){
   }
 }
 
-// ---------- 備份 / CSV ----------
+// ---------- 備份 / Excel ----------
 function exportBackup(){
   downloadBlob(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),`小棉倉備份_${today()}.json`);
 }
@@ -2353,7 +2531,67 @@ function importBackup(ev){
   r.readAsText(f,'utf-8');
   ev.target.value='';
 }
-function exportCSV(){
+function xmlText(s){
+  return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function crc32(bytes){
+  let crc=0xffffffff;
+  for(const byte of bytes){
+    crc^=byte;
+    for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);
+  }
+  return (crc^0xffffffff)>>>0;
+}
+function le16(n){return new Uint8Array([n&255,(n>>>8)&255]);}
+function le32(n){return new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);}
+function joinBytes(parts){
+  const size=parts.reduce((n,x)=>n+x.length,0),out=new Uint8Array(size);
+  let off=0;parts.forEach(x=>{out.set(x,off);off+=x.length;});return out;
+}
+function dosDateTime(d=new Date()){
+  const year=Math.max(1980,d.getFullYear());
+  const time=(d.getHours()<<11)|(d.getMinutes()<<5)|Math.floor(d.getSeconds()/2);
+  const date=((year-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  return {time,date};
+}
+function makeZip(entries){
+  const enc=new TextEncoder(),locals=[],centrals=[];
+  let offset=0;
+  const dt=dosDateTime();
+  entries.forEach(([name,content])=>{
+    const nameBytes=enc.encode(name),data=enc.encode(content),crc=crc32(data),size=data.length;
+    const local=joinBytes([
+      le32(0x04034b50),le16(20),le16(0x0800),le16(0),le16(dt.time),le16(dt.date),
+      le32(crc),le32(size),le32(size),le16(nameBytes.length),le16(0),nameBytes,data
+    ]);
+    locals.push(local);
+    const central=joinBytes([
+      le32(0x02014b50),le16(20),le16(20),le16(0x0800),le16(0),le16(dt.time),le16(dt.date),
+      le32(crc),le32(size),le32(size),le16(nameBytes.length),le16(0),le16(0),le16(0),le16(0),le32(0),le32(offset),nameBytes
+    ]);
+    centrals.push(central);
+    offset+=local.length;
+  });
+  const centralSize=centrals.reduce((n,x)=>n+x.length,0);
+  const eocd=joinBytes([le32(0x06054b50),le16(0),le16(0),le16(entries.length),le16(entries.length),le32(centralSize),le32(offset),le16(0)]);
+  return joinBytes([...locals,...centrals,eocd]);
+}
+function excelColumnName(index){
+  let n=index+1,name='';
+  while(n>0){
+    const r=(n-1)%26;
+    name=String.fromCharCode(65+r)+name;
+    n=Math.floor((n-1)/26);
+  }
+  return name;
+}
+function excelCell(value,rowIndex,colIndex,isHeader=false){
+  const ref=`${excelColumnName(colIndex)}${rowIndex+1}`;
+  const style=isHeader?' s="1"':'';
+  if(typeof value==='number'&&Number.isFinite(value))return `<c r="${ref}"${style}><v>${value}</v></c>`;
+  return `<c r="${ref}" t="inlineStr"${style}><is><t>${xmlText(value)}</t></is></c>`;
+}
+function exportHistoryExcel(){
   const rows=[['日期','大分類','類型','品項','數量','包數','實付總額','平均每包','通路','優惠備註','備註']];
   [...db.events].sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach(e=>{
     const i=db.items.find(x=>x.id===e.itemId);
@@ -2362,13 +2600,32 @@ function exportCSV(){
     const paid=hasPaid?Number(e.paidTotal):'';
     const avg=e.kind==='purchase'&&hasPaid&&Number(e.packs||0)>0?Number(paid)/Number(e.packs):'';
     rows.push([
-      e.date,cat,e.kind,i?itemDisplayName(i):(e.itemType?`${e.itemType}｜${e.itemName||''}`:(e.itemName||'')),e.qty||'',e.packs||'',
-      e.kind==='purchase'?paid:'',avg,e.store||'',e.promo||'',e.context||e.detail||''
+      e.date||'',cat,e.kind||'',i?itemDisplayName(i):(e.itemType?`${e.itemType}｜${e.itemName||''}`:(e.itemName||'')),
+      e.qty??'',e.packs??'',e.kind==='purchase'?paid:'',avg,e.store||'',e.promo||'',normalizeHistoryLocationText(e.context||e.detail||'')
     ]);
   });
-  const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),`小棉倉記錄_${today()}.csv`);
+
+  const rowXml=rows.map((row,r)=>`<row r="${r+1}">${row.map((value,c)=>excelCell(value,r,c,r===0)).join('')}</row>`).join('');
+  const lastCol=excelColumnName(rows[0].length-1);
+  const sheet=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+<cols><col min="1" max="1" width="14" customWidth="1"/><col min="2" max="3" width="12" customWidth="1"/><col min="4" max="4" width="38" customWidth="1"/><col min="5" max="6" width="11" customWidth="1"/><col min="7" max="8" width="14" customWidth="1"/><col min="9" max="10" width="20" customWidth="1"/><col min="11" max="11" width="58" customWidth="1"/></cols>
+<sheetData>${rowXml}</sheetData><autoFilter ref="A1:${lastCol}${rows.length}"/>
+</worksheet>`;
+  const files=[
+    ['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
+    ['_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+    ['xl/workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="記錄" sheetId="1" r:id="rId1"/></sheets></workbook>`],
+    ['xl/_rels/workbook.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+    ['xl/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFE4EC"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs></styleSheet>`],
+    ['xl/worksheets/sheet1.xml',sheet]
+  ];
+  const bytes=makeZip(files);
+  downloadBlob(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`小棉倉記錄_${localToday()}.xlsx`);
+  showToast('Excel 已匯出！');
 }
+
 function downloadBlob(blob,name){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -2377,6 +2634,7 @@ function downloadBlob(blob,name){
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
+initHistoryFilters();
 renderAll();
 initCloud();
 
