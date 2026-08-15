@@ -775,9 +775,160 @@ button:active{transform:scale(.98)}
   .cloud-actions{grid-template-columns:1fr}
 }
 
+
+
+/* ===== v1.7：全站視窗共通操作修正 ===== */
+/* 一般功能視窗：上下都保留安全距離，不再貼到瀏覽器邊緣 */
+.modalback:not(#appConfirmModal):not(#appAlertModal){
+  --modal-top-gap:max(24px,4dvh);
+  --modal-bottom-gap:max(42px,6dvh);
+  height:100dvh !important;
+  min-height:100dvh;
+  align-items:flex-start !important;
+  padding:var(--modal-top-gap) 10px var(--modal-bottom-gap) !important;
+  overflow:hidden !important;
+}
+.modalback:not(#appConfirmModal):not(#appAlertModal) > .transaction-modal{
+  width:min(720px,100%);
+  max-height:calc(100dvh - var(--modal-top-gap) - var(--modal-bottom-gap)) !important;
+  border-radius:28px 28px 20px 20px !important;
+}
+
+/* 所有功能視窗統一：固定標題＋內容獨立捲動＋固定操作列 */
+.transaction-modal{
+  display:flex !important;
+  flex-direction:column;
+  overflow:hidden !important;
+  padding:0 !important;
+  background:#fffafd;
+}
+.transaction-modal-head{
+  flex:0 0 auto;
+  position:relative;
+  z-index:40;
+  padding:18px 22px 13px;
+  background:#fffafd;
+  border-bottom:1px solid rgba(242,223,230,.98);
+  box-shadow:0 7px 16px rgba(151,88,111,.055);
+}
+.transaction-modal-head h3,
+.modal .transaction-modal-head h3{
+  position:static !important;
+  inset:auto !important;
+  z-index:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.transaction-modal-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto !important;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  padding:16px 22px 20px !important;
+  background:#fffafd;
+  position:relative;
+  z-index:1;
+}
+.modal-actions,
+.modal-actions.transaction-modal-actions{
+  flex:0 0 auto;
+  position:relative !important;
+  inset:auto !important;
+  z-index:40;
+  margin:0 !important;
+  /* DOM 仍是取消→主要操作，反轉後即為主要操作在左、取消在右 */
+  flex-direction:row-reverse;
+  gap:12px;
+  padding:16px 22px calc(24px + env(safe-area-inset-bottom)) !important;
+  background:#fffafd !important;
+  border-top:1px solid var(--line);
+  box-shadow:0 -7px 16px rgba(151,88,111,.055);
+}
+
+/* 小棉倉自訂系統訊息框：永遠顯示在所有功能視窗最上層 */
+#appConfirmModal,#appAlertModal{
+  z-index:1000 !important;
+  align-items:center !important;
+  padding:18px !important;
+  height:100dvh !important;
+  min-height:100dvh;
+}
+#appConfirmModal.show,#appAlertModal.show{display:flex !important}
+#appConfirmModal .app-dialog-modal,
+#appAlertModal .app-dialog-modal{
+  width:min(460px,calc(100% - 8px));
+  max-height:min(72dvh,560px) !important;
+  border-radius:24px !important;
+}
+#appConfirmMessage,.app-dialog-message{
+  white-space:pre-line;
+  line-height:1.65;
+  color:var(--ink);
+  margin:4px 0 8px;
+}
+.app-single-action{flex-direction:row !important}
+.app-single-action .btn{max-width:220px;margin-left:auto;margin-right:auto}
+
+@media(max-width:760px){
+  .modalback:not(#appConfirmModal):not(#appAlertModal){
+    --modal-top-gap:max(18px,3dvh);
+    --modal-bottom-gap:max(56px,calc(7dvh + env(safe-area-inset-bottom)));
+    padding:var(--modal-top-gap) 10px var(--modal-bottom-gap) !important;
+  }
+  .modalback:not(#appConfirmModal):not(#appAlertModal) > .transaction-modal{
+    width:100%;
+    max-height:calc(100dvh - var(--modal-top-gap) - var(--modal-bottom-gap)) !important;
+    border-radius:25px 25px 18px 18px !important;
+  }
+  .transaction-modal-head{padding:16px 18px 12px}
+  .transaction-modal-body{padding:14px 18px 18px !important}
+  .modal-actions,
+  .modal-actions.transaction-modal-actions{
+    padding:14px 18px calc(20px + env(safe-area-inset-bottom)) !important;
+  }
+  #appConfirmModal,#appAlertModal{padding:18px !important}
+  #appConfirmModal .app-dialog-modal,
+  #appAlertModal .app-dialog-modal{
+    width:100%;
+    max-height:70dvh !important;
+    border-radius:22px !important;
+  }
+}
+
 </style>
 </head>
 <body>
+
+<!-- 小棉倉自訂確認框：預設焦點放在取消 -->
+<div class="modalback" id="appConfirmModal" onclick="if(event.target===this)resolveAppConfirm(false)"><div class="modal transaction-modal app-dialog-modal" role="dialog" aria-modal="true" aria-labelledby="appConfirmTitle">
+  <div class="transaction-modal-head">
+    <h3 id="appConfirmTitle">❔ 請確認</h3>
+  </div>
+  <div class="transaction-modal-body">
+    <p id="appConfirmMessage"></p>
+  </div>
+  <div class="modal-actions transaction-modal-actions">
+    <button id="appConfirmCancel" class="btn grow" type="button" onclick="resolveAppConfirm(false)">取消</button>
+    <button id="appConfirmOk" class="btn primary grow" type="button" onclick="resolveAppConfirm(true)">確定</button>
+  </div>
+</div></div>
+
+<!-- 小棉倉自訂提示框：取代瀏覽器原生 appAlert() -->
+<div class="modalback" id="appAlertModal"><div class="modal transaction-modal app-dialog-modal" role="alertdialog" aria-modal="true" aria-labelledby="appAlertTitle">
+  <div class="transaction-modal-head">
+    <h3 id="appAlertTitle">💡 小棉倉提示</h3>
+  </div>
+  <div class="transaction-modal-body">
+    <p id="appAlertMessage" class="app-dialog-message"></p>
+  </div>
+  <div class="modal-actions transaction-modal-actions app-single-action">
+    <button id="appAlertOk" class="btn primary grow" type="button" onclick="resolveAppAlert()">確定</button>
+  </div>
+</div></div>
+
 <div class="toast-wrap"><div id="toast" class="toast"></div></div>
 <div class="app">
   <div class="topbar">
@@ -1091,13 +1242,13 @@ button:active{transform:scale(.98)}
     </div>
   </div>
 
-  <div class="settings-version">小棉倉 v1.6</div>
+  <div class="settings-version">小棉倉 v1.7</div>
   <div class="modal-actions"><button class="btn primary grow" onclick="closeModal('settingsModal')">關閉</button></div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const APP_VERSION='1.6';
+const APP_VERSION='1.7';
 const KEY='pad_inventory_cloud_v1';
 const CLOUD_META_KEY='pad_inventory_cloud_meta_v1';
 const LAST_LOGIN_EMAIL_KEY='pad_inventory_last_login_email';
@@ -1341,14 +1492,14 @@ async function loginCloud(){
 }
 async function logoutCloud(){
   if(!supabaseClient)return;
-  if(!confirm('確定要登出這台裝置嗎？\n其他已登入的小棉倉裝置不會被登出。'))return;
+  if(!(await askConfirm('確定要登出這台裝置嗎？\n其他已登入的小棉倉裝置不會被登出。',{title:'🚪 登出確認',confirmText:'登出'})))return;
 
   clearTimeout(cloudSyncTimer);
   await cloudSyncChain;
 
   const {error}=await supabaseClient.auth.signOut({scope:'local'});
   if(error){
-    alert(`登出失敗：${error.message}`);
+    await appAlert(`登出失敗：${error.message}`,{title:'☁️ 雲端同步'});
     return;
   }
   handleSignedOut();
@@ -1438,7 +1589,7 @@ async function pushCloudState(showSuccess=false){
     setCloudMeta({dirty:true});
     setCloudStatus('同步失敗','error');
     updateCloudUI();
-    if(showSuccess)alert(`同步失敗：${error.message}`);
+    if(showSuccess)await appAlert(`同步失敗：${error.message}`,{title:'☁️ 雲端同步'});
     return false;
   }
 
@@ -1471,7 +1622,7 @@ async function refreshCloudState(showResult=false){
   if(error){
     setCloudStatus('同步失敗','error');
     updateCloudUI();
-    if(showResult)alert(`同步失敗：${error.message}`);
+    if(showResult)await appAlert(`同步失敗：${error.message}`,{title:'☁️ 雲端同步'});
     return false;
   }
 
@@ -1931,7 +2082,7 @@ function renderHistory(){
     </div>`;
   }).join(''):'<div class="empty">沒有符合條件的記錄</div>';
 }
-function deleteHistoryEvent(id){
+async function deleteHistoryEvent(id){
   const e=db.events.find(x=>x.id===id);
   if(!e)return;
 
@@ -1939,8 +2090,9 @@ function deleteHistoryEvent(id){
   const nm=i?itemDisplayName(i):(e.itemType?`${e.itemType}｜${e.itemName||'已刪除品項'}`:(e.itemName||'已刪除品項'));
   const cat=categoryForEvent(e).text;
 
-  const ok=confirm(
-    `確定刪除這筆「${cat}」記錄嗎？\n${nm}\n\n只會刪除這筆歷史記錄，不會改變目前庫存。`
+  const ok=await askConfirm(
+    `確定刪除這筆「${cat}」記錄嗎？\n${nm}\n\n只會刪除這筆歷史記錄，不會改變目前庫存。`,
+    {title:'🗑️ 刪除記錄',confirmText:'刪除'}
   );
   if(!ok)return;
 
@@ -2003,10 +2155,10 @@ function saveNewStockKey(){
   const location=getNewKeyLocation();
   const note=document.getElementById('newKeyNote').value.trim();
 
-  if(!brand||!series)return alert('品牌和系列 / 款式要填喔～');
-  if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
-  if(packSize<=0)return alert('每包片數請輸入 1 以上的整數。');
-  if(!location)return alert('選擇「其他」時，請輸入存放位置。');
+  if(!brand||!series)return appAlert('品牌和系列 / 款式要填喔～');
+  if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return appAlert('長度請輸入大於 0 的合理數字。');
+  if(packSize<=0)return appAlert('每包片數請輸入 1 以上的整數。');
+  if(!location)return appAlert('選擇「其他」時，請輸入存放位置。');
 
   const data={
     brand,series,type,length,pantsType,packSize,location,note,
@@ -2122,14 +2274,14 @@ function updateManagePreview(){
   document.getElementById('managePreview').innerHTML=
     `調整後：<b>${fmt(packs)} 包 × ${fmt(i.packSize)} 片 ＋ ${fmt(opened)} 片 ＝ ${fmt(packs*Number(i.packSize||0)+opened)} 片</b>`;
 }
-function saveManageStock(){
+async function saveManageStock(){
   const i=db.items.find(x=>x.id===document.getElementById('manageItem').value);
-  if(!i)return alert('請先選擇品項。');
+  if(!i)return appAlert('請先選擇品項。');
   const packs=safeNonnegInt('manageUnopenedPacks');
   const opened=safeNonnegInt('manageOpenedQty');
   const date=document.getElementById('manageDate').value;
-  if(opened>Number(i.packSize||0))return alert(`已拆封剩餘片數不能大於每包 ${i.packSize} 片。`);
-  if(!date)return alert('請選擇盤點日期。');
+  if(opened>Number(i.packSize||0))return appAlert(`已拆封剩餘片數不能大於每包 ${i.packSize} 片。`);
+  if(!date)return appAlert('請選擇盤點日期。');
 
   const oldQty=calcQty(i);
   const newQty=Number(i.packSize||0)*packs+opened;
@@ -2145,7 +2297,7 @@ function saveManageStock(){
 
   saveDB();
   closeModal('manageStockModal');
-  alert('記錄完成！');
+  await appAlert('記錄完成！',{title:'✅ 盤點完成'});
   showHistoryToday();
 }
 
@@ -2240,10 +2392,10 @@ function savePurchase(){
   const packs=safeNonnegInt('purchasePacks');
   const paid=numVal('purchasePaidTotal');
   const date=document.getElementById('purchaseDate').value;
-  if(!i)return alert('請先選擇品項。');
-  if(packs<=0)return alert('「買了幾包」請輸入 1 以上的整數。');
-  if(!Number.isFinite(paid)||paid<0)return alert('請填「本次實付總額」。');
-  if(!date)return alert('請選擇購買日期。');
+  if(!i)return appAlert('請先選擇品項。');
+  if(packs<=0)return appAlert('「買了幾包」請輸入 1 以上的整數。');
+  if(!Number.isFinite(paid)||paid<0)return appAlert('請填「本次實付總額」。');
+  if(!date)return appAlert('請選擇購買日期。');
 
   i.unopenedPacks=Number(i.unopenedPacks||0)+packs;
   syncQty(i);
@@ -2298,7 +2450,7 @@ function countRow(i,prefix){
     </div>
   </div>`;
 }
-function saveCounts(type){
+async function saveCounts(type){
   const xs=type==='period'?[...db.items]:db.items.filter(i=>i.type==='護墊');
   const date=document.getElementById(type==='period'?'periodDate':'linerDate').value||today();
 
@@ -2311,7 +2463,7 @@ function saveCounts(type){
     const opened=safeNonnegIntValue(openedEl.value);
 
     if(opened>Number(i.packSize||0)){
-      alert(`「${itemName(i)}」的已拆封剩餘片數不能大於每包 ${i.packSize} 片。`);
+      await appAlert(`「${itemName(i)}」的已拆封剩餘片數不能大於每包 ${i.packSize} 片。`);
       return;
     }
 
@@ -2338,11 +2490,11 @@ function saveCounts(type){
 
   saveDB();
   closeModal(type==='period'?'periodModal':'linerModal');
-  alert('記錄完成！');
+  await appAlert('記錄完成！',{title:'✅ 盤點完成'});
   showHistoryToday();
 }
-function savePeriodCount(){saveCounts('period')}
-function saveLinerCount(){saveCounts('liner')}
+async function savePeriodCount(){await saveCounts('period')}
+async function saveLinerCount(){await saveCounts('liner')}
 
 // ---------- 庫存：編輯品項資料 ----------
 function syncItemFields(){
@@ -2453,9 +2605,9 @@ function saveItem(){
   };
   data.qty=calcQty(data);
 
-  if(!data.brand||!data.series)return alert('品牌和系列 / 款式要填喔～');
-  if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return alert('長度請輸入大於 0 的合理數字。');
-  if(!location)return alert('選擇「其他」時，請輸入存放位置。');
+  if(!data.brand||!data.series)return appAlert('品牌和系列 / 款式要填喔～');
+  if(type!=='褲型'&&(!Number.isFinite(length)||length<=0))return appAlert('長度請輸入大於 0 的合理數字。');
+  if(!location)return appAlert('選擇「其他」時，請輸入存放位置。');
 
   const dup=findDuplicate(data,id);
   if(dup){
@@ -2491,22 +2643,26 @@ function saveItem(){
   closeModal('itemModal');
   showToast('修改成功！');
 }
-function deleteItemById(id){
+async function deleteItemById(id){
   const i=db.items.find(x=>x.id===id);
   if(!i)return;
-  if(confirm(`確定刪除「${itemName(i)}」嗎？\n刪除記錄可在「記錄」分頁確認。`)){
-    db.events.forEach(e=>{
-      if(e.itemId===i.id&&!e.itemLocation)e.itemLocation=i.location||'預設';
-    });
-    db.events.push({
-      id:uid(),kind:'delete',itemId:i.id,itemName:itemName(i),itemType:i.type,itemLocation:i.location||'預設',qty:calcQty(i),
-      detail:`未拆 ${fmt(i.unopenedPacks)} 包・已拆封 ${fmt(i.openedQty)} 片`,
-      date:today(),createdAt:Date.now()
-    });
-    db.items=db.items.filter(x=>x.id!==id);
-    saveDB();
-    showToast('刪除成功！','delete');
-  }
+  const ok=await askConfirm(
+    `確定刪除「${itemName(i)}」嗎？\n刪除記錄可在「記錄」分頁確認。`,
+    {title:'🗑️ 刪除品項',confirmText:'刪除'}
+  );
+  if(!ok)return;
+
+  db.events.forEach(e=>{
+    if(e.itemId===i.id&&!e.itemLocation)e.itemLocation=i.location||'預設';
+  });
+  db.events.push({
+    id:uid(),kind:'delete',itemId:i.id,itemName:itemName(i),itemType:i.type,itemLocation:i.location||'預設',qty:calcQty(i),
+    detail:`未拆 ${fmt(i.unopenedPacks)} 包・已拆封 ${fmt(i.openedQty)} 片`,
+    date:today(),createdAt:Date.now()
+  });
+  db.items=db.items.filter(x=>x.id!==id);
+  saveDB();
+  showToast('刪除成功！','delete');
 }
 
 // ---------- 備份 / Excel ----------
@@ -2517,16 +2673,21 @@ function importBackup(ev){
   const f=ev.target.files?.[0];
   if(!f)return;
   const r=new FileReader();
-  r.onload=()=>{
+  r.onload=async ()=>{
     try{
       const x=JSON.parse(r.result);
       if(!x.items||!x.events)throw 0;
-      if(confirm('匯入會覆蓋目前這台裝置上的資料，確定嗎？')){
-        db=normalizeDB(x);
-        saveDB();
-        alert('匯入完成');
-      }
-    }catch(e){alert('這不是有效的小棉倉備份檔')}
+      const ok=await askConfirm(
+        '匯入會覆蓋目前這台裝置上的資料，確定嗎？',
+        {title:'⬆️ 匯入備份',confirmText:'匯入'}
+      );
+      if(!ok)return;
+      db=normalizeDB(x);
+      saveDB();
+      await appAlert('匯入完成',{title:'✅ 備份匯入'});
+    }catch(e){
+      await appAlert('這不是有效的小棉倉備份檔',{title:'⚠️ 匯入失敗'});
+    }
   };
   r.readAsText(f,'utf-8');
   ev.target.value='';
@@ -2633,6 +2794,121 @@ function downloadBlob(blob,name){
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
+
+
+
+// ===== v1.7：統一所有功能視窗結構 =====
+// 舊版各 modal 的 HTML 結構不完全一致；載入時統一整理成：標題 / 可捲內容 / 固定操作列。
+function normalizeAllModalLayouts(){
+  const systemIds=new Set(['appConfirmModal','appAlertModal']);
+  document.querySelectorAll('.modalback > .modal').forEach(modal=>{
+    const back=modal.parentElement;
+    if(systemIds.has(back?.id))return;
+
+    modal.classList.add('transaction-modal');
+
+    let body=[...modal.children].find(x=>x.classList?.contains('transaction-modal-body'))||null;
+    let actions=[...modal.children].find(x=>x.classList?.contains('modal-actions'))||null;
+    if(!actions&&body){
+      actions=[...body.children].find(x=>x.classList?.contains('modal-actions'))||null;
+    }
+
+    let head=[...modal.children].find(x=>x.classList?.contains('transaction-modal-head'))||null;
+    let title=null;
+    if(body)title=[...body.children].find(x=>x.tagName==='H3')||null;
+    if(!title)title=[...modal.children].find(x=>x.tagName==='H3')||null;
+
+    if(!head){
+      head=document.createElement('div');
+      head.className='transaction-modal-head';
+      if(title)head.appendChild(title);
+      modal.insertBefore(head,modal.firstChild);
+    }else if(title&&title.parentElement!==head){
+      head.appendChild(title);
+    }
+
+    if(!body){
+      body=document.createElement('div');
+      body.className='transaction-modal-body';
+      const movable=[...modal.childNodes].filter(node=>node!==head&&node!==actions);
+      modal.insertBefore(body,actions||null);
+      movable.forEach(node=>body.appendChild(node));
+    }else{
+      // 若舊結構在 body 外還留有一般內容，一併收進可捲區。
+      const extras=[...modal.childNodes].filter(node=>node!==head&&node!==body&&node!==actions);
+      extras.forEach(node=>body.appendChild(node));
+    }
+
+    if(actions){
+      actions.classList.add('transaction-modal-actions');
+      if(actions.parentElement!==modal)modal.appendChild(actions);
+      else modal.appendChild(actions); // 確保永遠在最下方
+    }
+  });
+}
+
+let appConfirmResolver=null;
+function askConfirm(message,{title='❔ 請確認',confirmText='確定',cancelText='取消'}={}){
+  return new Promise(resolve=>{
+    if(appConfirmResolver){
+      appConfirmResolver(false);
+      appConfirmResolver=null;
+    }
+    document.getElementById('appConfirmTitle').textContent=title;
+    document.getElementById('appConfirmMessage').textContent=String(message||'');
+    document.getElementById('appConfirmOk').textContent=confirmText;
+    document.getElementById('appConfirmCancel').textContent=cancelText;
+    appConfirmResolver=resolve;
+    document.getElementById('appConfirmModal').classList.add('show');
+    setTimeout(()=>document.getElementById('appConfirmCancel')?.focus(),60);
+  });
+}
+function resolveAppConfirm(result){
+  document.getElementById('appConfirmModal')?.classList.remove('show');
+  const resolve=appConfirmResolver;
+  appConfirmResolver=null;
+  if(resolve)resolve(!!result);
+}
+
+let appAlertResolver=null;
+function appAlert(message,{title='💡 小棉倉提示',okText='確定'}={}){
+  return new Promise(resolve=>{
+    if(appAlertResolver){
+      appAlertResolver();
+      appAlertResolver=null;
+    }
+    document.getElementById('appAlertTitle').textContent=title;
+    document.getElementById('appAlertMessage').textContent=String(message||'');
+    document.getElementById('appAlertOk').textContent=okText;
+    appAlertResolver=resolve;
+    document.getElementById('appAlertModal').classList.add('show');
+    setTimeout(()=>document.getElementById('appAlertOk')?.focus(),60);
+  });
+}
+function resolveAppAlert(){
+  document.getElementById('appAlertModal')?.classList.remove('show');
+  const resolve=appAlertResolver;
+  appAlertResolver=null;
+  if(resolve)resolve();
+}
+
+document.addEventListener('keydown',event=>{
+  const alertModal=document.getElementById('appAlertModal');
+  if(alertModal?.classList.contains('show')){
+    if(event.key==='Escape'||event.key==='Enter'){
+      event.preventDefault();
+      resolveAppAlert();
+    }
+    return;
+  }
+  const confirmModal=document.getElementById('appConfirmModal');
+  if(confirmModal?.classList.contains('show')&&event.key==='Escape'){
+    event.preventDefault();
+    resolveAppConfirm(false);
+  }
+});
+
+normalizeAllModalLayouts();
 
 initHistoryFilters();
 renderAll();
