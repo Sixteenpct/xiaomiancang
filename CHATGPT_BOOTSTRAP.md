@@ -1,5 +1,14 @@
 # ChatGPT Bootstrap
 
+## Owner-wide project workflow rule
+
+所有專案型長流程（不限 Git、程式、試算表、文件、考古、資料整理）都必須先讀並遵守：
+
+> `Sixteenpct/dev_garden/CHATGPT_GLOBAL_WORKFLOW_RULES.md`
+
+預設施工節奏固定為：**一個完整 MICRO_CHECKPOINT → 保存 → 驗證 → 回報 → 停止**。只有 LiouLiou 明確說「繼續」或當次明確要求連續施工，才可進下一個 checkpoint。
+
+
 本 repo 由 LiouLiou 名下 `Sixteenpct/*` Git 協作規則管理。
 
 在 ChatGPT／小雀進行任何 Git write、批次改檔、commit、CI 修復或長時間 Git 施工前，必須先讀並遵守：
